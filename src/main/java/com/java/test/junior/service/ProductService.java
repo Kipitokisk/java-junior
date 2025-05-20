@@ -7,6 +7,8 @@ package com.java.test.junior.service;
 import com.java.test.junior.model.Product;
 import com.java.test.junior.model.ProductDTO;
 
+import java.util.List;
+
 /**
  * @author dumitru.beselea
  * @version java-test-junior
@@ -18,4 +20,8 @@ public interface ProductService {
      * @return the product created from the database
      */
     Product createProduct(ProductDTO productDTO);
+    Product findProduct(Long id);
+    Product updateProduct(Long id, ProductDTO productDTO);
+    void deleteProduct(Long id);
+    List<Product> findAll(int page, int pageSize);
 }
