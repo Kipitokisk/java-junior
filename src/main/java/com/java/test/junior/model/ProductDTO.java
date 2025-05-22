@@ -1,25 +1,23 @@
 /*
  * Copyright (c) 2013-2022 Global Database Ltd, All rights reserved.
  */
-
 package com.java.test.junior.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
-/**
- * @author dumitru.beselea
- * @version java-test-junior
- * @apiNote 08.12.2022
- */
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class ProductDTO {
+    @NotBlank(message = "Name is required")
     private String name;
+    @NotNull(message = "Price is required")
+    @Min(value = 0, message = "Price must be non-negative")
     private Double price;
     private String description;
 }

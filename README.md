@@ -72,8 +72,8 @@ You must work with spring security and liquibase
 
 ### Tasks
 
-1. Add the login and register functionality of a user using `spring security` basic Auth.
-2. Add validation for user registration or auth.
+1. Add the login and register functionality of a userEntity using `spring security` basic Auth.
+2. Add validation for userEntity registration or auth.
 3. Modify the previously created endpoints so that you cannot add a product if you are not authenticated
 
 ### Milestone 3
@@ -89,8 +89,8 @@ Working with algorithms and data structures
 ### Tasks
 
 1. Add the ability to search for products by name
-2. Add the ability to like a product - the user can like a product only once
-3. Add the ability to dislike a product - the user can dislike a product only once
+2. Add the ability to like a product - the userEntity can like a product only once
+3. Add the ability to dislike a product - the userEntity can dislike a product only once
 
 ### Milestone 4
 
@@ -110,7 +110,7 @@ Integrated swagger in the data project.
 
 ### Tasks
 
-Add a `POST /loading/products` endpoint which will get the address where the products file is located. The address to the file can be a local one or an external server via the HTTP protocol. A sample file in resources/products.csv. All these products must be assigned to the admin user, in case he is not in the base then create the admin user and then add these products to him.
+Add a `POST /loading/products` endpoint which will get the address where the products file is located. The address to the file can be a local one or an external server via the HTTP protocol. A sample file in resources/products.csv. All these products must be assigned to the admin userEntity, in case he is not in the base then create the admin userEntity and then add these products to him.
 
 ### Milestone 6
 

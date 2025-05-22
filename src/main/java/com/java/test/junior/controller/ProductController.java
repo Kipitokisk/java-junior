@@ -1,7 +1,6 @@
 /*
  * Copyright (c) 2013-2022 Global Database Ltd, All rights reserved.
  */
-
 package com.java.test.junior.controller;
 
 import com.java.test.junior.exception.ProductNotFoundException;
@@ -9,78 +8,128 @@ import com.java.test.junior.model.Product;
 import com.java.test.junior.model.ProductDTO;
 import com.java.test.junior.service.ProductService;
 import lombok.AllArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
+import java.util.HashMap;
 import java.util.List;
-
-/**
- * @author dumitru.beselea
- * @version java-test-junior
- * @apiNote 08.12.2022
- */
+import java.util.Map;
 
 @RestController
 @RequestMapping("/products")
 @AllArgsConstructor
 public class ProductController {
+    private static final Logger logger = LoggerFactory.getLogger(ProductController.class);
     private final ProductService productService;
 
     @PostMapping
-    public ResponseEntity<?> createProduct(@RequestBody ProductDTO productDTO) {
+    public ResponseEntity<?> createProduct(@Valid @RequestBody ProductDTO productDTO) {
+        logger.info("POST /products called with: {}", productDTO);
         try {
-            return ResponseEntity.status(HttpStatus.CREATED).body(productService.createProduct(productDTO));
+            Product product = productService.createProduct(productDTO);
+            return ResponseEntity.status(HttpStatus.CREATED).body(buildSuccessResponse("Product created successfully", product));
         } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error creating product: " + e.getMessage());
+            logger.error("Error creating product: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(getErrorResponse("Error creating product: " + e.getMessage()));
         }
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> findProductById(@PathVariable("id") Long id) {
+    public ResponseEntity<?> findProductById(@PathVariable("id") @Min(1) Long id) {
+        logger.info("GET /products/{} called", id);
         try {
             Product product = productService.findProduct(id);
-            return ResponseEntity.status(HttpStatus.FOUND).body(product);
+            return ResponseEntity.status(HttpStatus.OK).body(buildSuccessResponse("Product retrieved successfully", product));
         } catch (ProductNotFoundException p) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(p.getMessage());
+            logger.warn("Product not found: {}", p.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(getErrorResponse(p.getMessage()));
         } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+            logger.error("Error retrieving product: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(getErrorResponse(e.getMessage()));
         }
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> modifyProductById(@PathVariable("id") Long id, @RequestBody ProductDTO productDTO) {
+    public ResponseEntity<?> modifyProductById(@PathVariable("id") @Min(1) Long id, @Valid @RequestBody ProductDTO productDTO) {
+        logger.info("PUT /products/{} called with: {}", id, productDTO);
         try {
             Product product = productService.updateProduct(id, productDTO);
-            return ResponseEntity.status(HttpStatus.OK).body(product);
+            return ResponseEntity.status(HttpStatus.OK).body(buildSuccessResponse("Product updated successfully", product));
         } catch (ProductNotFoundException p) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(p.getMessage());
+            logger.warn("Product not found: {}", p.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(getErrorResponse(p.getMessage()));
         } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+            logger.error("Error updating product: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(getErrorResponse(e.getMessage()));
         }
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteProduct(@PathVariable("id") Long id) {
+    public ResponseEntity<?> deleteProduct(@PathVariable("id") @Min(1) Long id) {
+        logger.info("DELETE /products/{} called", id);
         try {
             productService.deleteProduct(id);
-            return ResponseEntity.noContent().build();
+            return ResponseEntity.status(HttpStatus.OK).body(buildSuccessResponse("Product deleted successfully", null));
         } catch (ProductNotFoundException p) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(p.getMessage());
+            logger.warn("Product not found: {}", p.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(getErrorResponse(p.getMessage()));
         } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+            logger.error("Error deleting product: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(getErrorResponse(e.getMessage()));
         }
     }
 
     @GetMapping
-    public ResponseEntity<?> findAll(@RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "10") int pageSize) {
+    public ResponseEntity<?> findAll(
+            @RequestParam(defaultValue = "1") @Min(value = 1, message = "Page must be at least 1") int page,
+            @RequestParam(defaultValue = "10") @Min(value = 1, message = "Page size must be at least 1") @Max(value = 100, message = "Page size cannot exceed 100") int pageSize) {
+        logger.info("GET /products called with page={}, pageSize={}", page, pageSize);
         try {
             List<Product> products = productService.findAll(page, pageSize);
-            return ResponseEntity.status(HttpStatus.OK).body(products);
+            Map<String, Object> response = buildSuccessResponse("Products retrieved successfully", products);
+            response.put("page", page);
+            response.put("pageSize", pageSize);
+            return ResponseEntity.status(HttpStatus.OK).body(response);
         } catch (IllegalArgumentException i) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(i.getMessage());
+            logger.warn("Invalid pagination parameters: {}", i.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(getErrorResponse(i.getMessage()));
         } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+            logger.error("Error retrieving products: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(getErrorResponse(e.getMessage()));
         }
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<?> handleValidationExceptions(MethodArgumentNotValidException ex) {
+        logger.warn("Validation error: {}", ex.getMessage());
+        Map<String, String> errors = new HashMap<>();
+        for (FieldError error : ex.getBindingResult().getFieldErrors()) {
+            errors.put(error.getField(), error.getDefaultMessage());
+        }
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(getErrorResponse("Validation failed: " + errors));
+    }
+
+    private static Map<String, Object> buildSuccessResponse(String message, Object data) {
+        Map<String, Object> response = new HashMap<>();
+        response.put("success", true);
+        response.put("message", message);
+        response.put("data", data);
+        return response;
+    }
+
+    private static Map<String, Object> getErrorResponse(String message) {
+        Map<String, Object> response = new HashMap<>();
+        response.put("success", false);
+        response.put("message", message);
+        response.put("data", null);
+        return response;
     }
 }
