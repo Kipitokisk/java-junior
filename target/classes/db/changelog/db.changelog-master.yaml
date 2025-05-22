@@ -4,5 +4,12 @@ databaseChangeLog:
       author: java-test-junior
       changes:
         - sqlFile:
-              path: migration/V1__migrate_table_product.sql
-              relativeToChangelogFile: true
+            path: migration/V1__migrate_table_product.sql
+            relativeToChangelogFile: true
+  - changeSet:
+      id: 2
+      author: java-test-junior
+      changes:
+        - sqlFile:
+            path: migration/V2__create_table_user.sql
+            relativeToChangelogFile: true
