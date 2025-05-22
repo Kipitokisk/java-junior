@@ -32,7 +32,7 @@ public class ProductController {
 
     @PostMapping
     public ResponseEntity<?> createProduct(@Valid @RequestBody ProductDTO productDTO) {
-        logger.info("POST /products called with: {}", productDTO);
+        logger.info("POST /api/products called with: {}", productDTO);
         try {
             Product product = productService.createProduct(productDTO);
             return ResponseEntity.status(HttpStatus.CREATED).body(buildSuccessResponse("Product created successfully", product));
@@ -44,7 +44,7 @@ public class ProductController {
 
     @GetMapping("/{id}")
     public ResponseEntity<?> findProductById(@PathVariable("id") @Min(1) Long id) {
-        logger.info("GET /products/{} called", id);
+        logger.info("GET /api/products/{} called", id);
         try {
             Product product = productService.findProduct(id);
             return ResponseEntity.status(HttpStatus.OK).body(buildSuccessResponse("Product retrieved successfully", product));
@@ -59,7 +59,7 @@ public class ProductController {
 
     @PutMapping("/{id}")
     public ResponseEntity<?> modifyProductById(@PathVariable("id") @Min(1) Long id, @Valid @RequestBody ProductDTO productDTO) {
-        logger.info("PUT /products/{} called with: {}", id, productDTO);
+        logger.info("PUT /api/products/{} called with: {}", id, productDTO);
         try {
             Product product = productService.updateProduct(id, productDTO);
             return ResponseEntity.status(HttpStatus.OK).body(buildSuccessResponse("Product updated successfully", product));
@@ -74,7 +74,7 @@ public class ProductController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteProduct(@PathVariable("id") @Min(1) Long id) {
-        logger.info("DELETE /products/{} called", id);
+        logger.info("DELETE /api/products/{} called", id);
         try {
             productService.deleteProduct(id);
             return ResponseEntity.status(HttpStatus.OK).body(buildSuccessResponse("Product deleted successfully", null));
@@ -91,7 +91,7 @@ public class ProductController {
     public ResponseEntity<?> findAll(
             @RequestParam(defaultValue = "1") @Min(value = 1, message = "Page must be at least 1") int page,
             @RequestParam(defaultValue = "10") @Min(value = 1, message = "Page size must be at least 1") @Max(value = 100, message = "Page size cannot exceed 100") int pageSize) {
-        logger.info("GET /products called with page={}, pageSize={}", page, pageSize);
+        logger.info("GET /api/products called with page={}, pageSize={}", page, pageSize);
         try {
             List<Product> products = productService.findAll(page, pageSize);
             Map<String, Object> response = buildSuccessResponse("Products retrieved successfully", products);

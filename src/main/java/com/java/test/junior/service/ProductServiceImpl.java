@@ -7,9 +7,12 @@ import com.java.test.junior.exception.ProductNotFoundException;
 import com.java.test.junior.mapper.ProductMapper;
 import com.java.test.junior.model.Product;
 import com.java.test.junior.model.ProductDTO;
+import com.java.test.junior.model.User;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -20,6 +23,7 @@ import java.util.List;
 public class ProductServiceImpl implements ProductService {
     private static final Logger logger = LoggerFactory.getLogger(ProductServiceImpl.class);
     private final ProductMapper productMapper;
+    private final UserService userService;
 
     @Override
     public Product createProduct(ProductDTO productDTO) {
@@ -32,13 +36,20 @@ public class ProductServiceImpl implements ProductService {
         return product;
     }
 
-    private static Product mapDTOToProduct(ProductDTO productDTO) {
+    private Product mapDTOToProduct(ProductDTO productDTO) {
         Product product = new Product();
         product.setName(productDTO.getName());
         product.setDescription(productDTO.getDescription());
         product.setPrice(productDTO.getPrice());
-        // In a real app, userId should come from authentication context
-        product.setUserId(1L);
+
+        String username = ((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername();
+
+        User user = userService.findByUsername(username);
+        if (user == null) {
+            throw new RuntimeException("Authenticated user not found in database");
+        }
+        product.setUserId(user.getId());
+
         return product;
     }
 
