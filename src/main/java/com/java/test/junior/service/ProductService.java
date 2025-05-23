@@ -9,7 +9,7 @@ import com.java.test.junior.model.ProductDTO;
 import java.util.List;
 
 public interface ProductService {
-    Product createProduct(ProductDTO productDTO);
+    ProductDTO createProduct(ProductDTO productDTO);
     Product findProduct(Long id);
     Product updateProduct(Long id, ProductDTO productDTO);
     void deleteProduct(Long id);

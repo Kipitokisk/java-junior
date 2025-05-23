@@ -26,14 +26,14 @@ public class ProductServiceImpl implements ProductService {
     private final UserService userService;
 
     @Override
-    public Product createProduct(ProductDTO productDTO) {
+    public ProductDTO createProduct(ProductDTO productDTO) {
         logger.info("Creating product: {}", productDTO);
         Product product = mapDTOToProduct(productDTO);
         product.setCreatedAt(LocalDateTime.now());
         product.setUpdatedAt(LocalDateTime.now());
         productMapper.save(product);
         logger.info("Product created with ID: {}", product.getId());
-        return product;
+        return productDTO;
     }
 
     private Product mapDTOToProduct(ProductDTO productDTO) {
