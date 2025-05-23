@@ -1,23 +1,26 @@
 package com.java.test.junior.util;
 
-import java.util.HashMap;
-import java.util.Map;
+import com.java.test.junior.model.Response;
 
 public class ResponseUtil {
 
-    public static Map<String, Object> buildSuccessResponse(String message, Object data) {
-        Map<String, Object> response = new HashMap<>();
-        response.put("success", true);
-        response.put("message", message);
-        response.put("data", data);
+    private ResponseUtil() {
+        throw new IllegalStateException("Utility class");
+    }
+
+    public static Response buildSuccessResponse(String message, Object data) {
+        Response response = new Response();
+        response.setSuccess(true);
+        response.setMessage(message);
+        response.setData(data);
         return response;
     }
 
-    public static Map<String, Object> getErrorResponse(String message) {
-        Map<String, Object> response = new HashMap<>();
-        response.put("success", false);
-        response.put("message", message);
-        response.put("data", null);
+    public static Response getErrorResponse(String message) {
+        Response response = new Response();
+        response.setSuccess(false);
+        response.setMessage(message);
+        response.setData(null);
         return response;
     }
 }

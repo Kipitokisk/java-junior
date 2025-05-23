@@ -2,16 +2,15 @@ package com.java.test.junior.service;
 
 import com.java.test.junior.mapper.UserMapper;
 import com.java.test.junior.model.User;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 @Service
+@AllArgsConstructor
 public class CustomUserDetailsService implements UserDetailsService {
-
-    @Autowired
     private UserMapper userMapper;
 
     @Override

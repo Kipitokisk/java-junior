@@ -1,24 +1,33 @@
 package com.java.test.junior.service;
 
 import com.java.test.junior.exception.ResourceAlreadyExistsException;
+import com.java.test.junior.exception.ResourceNotFoundException;
 import com.java.test.junior.mapper.UserMapper;
 import com.java.test.junior.model.User;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 @Service
+@AllArgsConstructor
 public class UserServiceImpl implements UserService{
-
-    @Autowired
-    private UserMapper userMapper;
+    private static final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
+    private final UserMapper userMapper;
 
     public User findById(Long id) {
         return userMapper.findById(id);
     }
 
     public User findByUsername(String username) {
-        return userMapper.findByUsername(username);
+        logger.info("Finding user with username: {}", username);
+        User user = userMapper.findByUsername(username);
+        if (user == null) {
+            logger.warn("Product not found with username: {}", username);
+            throw new ResourceNotFoundException("Product not found with username: " + username);
+        }
+        return user;
     }
 
     public void save(User user) {

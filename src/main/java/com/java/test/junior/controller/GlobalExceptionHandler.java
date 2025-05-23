@@ -1,5 +1,6 @@
 package com.java.test.junior.controller;
 
+import com.java.test.junior.model.Response;
 import org.postgresql.util.PSQLException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,10 +19,10 @@ import static com.java.test.junior.util.ResponseUtil.getErrorResponse;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
-        private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+    private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<?> handleValidationExceptions(MethodArgumentNotValidException ex) {
+    public ResponseEntity<Response> handleValidationExceptions(MethodArgumentNotValidException ex) {
         logger.warn("Validation error: {}", ex.getMessage());
         Map<String, String> errors = new HashMap<>();
         for (FieldError error : ex.getBindingResult().getFieldErrors()) {
@@ -31,7 +32,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(DataIntegrityViolationException.class)
-    public ResponseEntity<?> handleDataIntegrityViolation(DataIntegrityViolationException ex) {
+    public ResponseEntity<Response> handleDataIntegrityViolation(DataIntegrityViolationException ex) {
         logger.warn("Data integrity violation: {}", ex.getMessage());
 
         String userMessage = "Data conflict";
@@ -45,6 +46,8 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.CONFLICT)
                 .body(getErrorResponse("Error creating product: " + userMessage));
     }
+
+
 
     private String extractPostgresMessage(String message) {
         return message.split("\n")[0];

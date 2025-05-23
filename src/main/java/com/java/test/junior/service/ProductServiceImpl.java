@@ -3,7 +3,7 @@
  */
 package com.java.test.junior.service;
 
-import com.java.test.junior.exception.ProductNotFoundException;
+import com.java.test.junior.exception.ResourceNotFoundException;
 import com.java.test.junior.mapper.ProductMapper;
 import com.java.test.junior.model.Product;
 import com.java.test.junior.model.ProductDTO;
@@ -59,7 +59,7 @@ public class ProductServiceImpl implements ProductService {
         Product product = productMapper.findById(id);
         if (product == null) {
             logger.warn("Product not found with ID: {}", id);
-            throw new ProductNotFoundException("Product not found with id: " + id);
+            throw new ResourceNotFoundException("Product not found with id: " + id);
         }
         return product;
     }
@@ -70,7 +70,7 @@ public class ProductServiceImpl implements ProductService {
         Product product = productMapper.findById(id);
         if (product == null) {
             logger.warn("Product not found with ID: {}", id);
-            throw new ProductNotFoundException("Product not found with id: " + id);
+            throw new ResourceNotFoundException("Product not found with id: " + id);
         }
         product.setName(productDTO.getName());
         product.setPrice(productDTO.getPrice());
@@ -87,7 +87,7 @@ public class ProductServiceImpl implements ProductService {
         Product product = productMapper.findById(id);
         if (product == null) {
             logger.warn("Product not found with ID: {}", id);
-            throw new ProductNotFoundException("Product not found with id: " + id);
+            throw new ResourceNotFoundException("Product not found with id: " + id);
         }
         productMapper.delete(id);
         logger.info("Product deleted with ID: {}", id);
@@ -113,7 +113,7 @@ public class ProductServiceImpl implements ProductService {
         Product product = productMapper.findByName(name);
         if (product == null) {
             logger.warn("Product not found with name: {}", name);
-            throw new ProductNotFoundException("Product not found with name: " + name);
+            throw new ResourceNotFoundException("Product not found with name: " + name);
         }
         return product;
     }

@@ -21,3 +21,10 @@ databaseChangeLog:
             tableName: product
             columnNames: name
             constraintName: uq_product_name
+  - changeSet:
+      id: 4
+      author: java-test-junior
+      changes:
+        - sqlFile:
+            path: migration/V3__create_table_user_product.sql
+            relativeToChangelogFile: true

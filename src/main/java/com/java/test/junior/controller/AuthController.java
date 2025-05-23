@@ -1,6 +1,7 @@
 package com.java.test.junior.controller;
 
 import com.java.test.junior.exception.ResourceAlreadyExistsException;
+import com.java.test.junior.model.Response;
 import com.java.test.junior.model.User;
 import com.java.test.junior.model.UserDTO;
 import com.java.test.junior.service.UserService;
@@ -10,13 +11,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.validation.FieldError;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.util.HashMap;
-import java.util.Map;
 
 import static com.java.test.junior.util.ResponseUtil.buildSuccessResponse;
 import static com.java.test.junior.util.ResponseUtil.getErrorResponse;
@@ -30,7 +27,7 @@ public class AuthController {
     private PasswordEncoder passwordEncoder;
 
     @PostMapping("/register")
-    public ResponseEntity<?> register(@Valid @RequestBody UserDTO userDTO) {
+    public ResponseEntity<Response> register(@Valid @RequestBody UserDTO userDTO) {
         logger.info("POST /api/auth/register called with: {}", userDTO);
         try {
             User user = new User();
@@ -46,15 +43,5 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.CONFLICT).body(getErrorResponse(e.getMessage()));
         }
 
-    }
-
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<?> handleValidationExceptions(MethodArgumentNotValidException ex) {
-        logger.warn("Validation error: {}", ex.getMessage());
-        Map<String, String> errors = new HashMap<>();
-        for (FieldError error : ex.getBindingResult().getFieldErrors()) {
-            errors.put(error.getField(), error.getDefaultMessage());
-        }
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(getErrorResponse("Validation failed: " + errors));
     }
 }
