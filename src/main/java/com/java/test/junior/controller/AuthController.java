@@ -7,7 +7,6 @@ import com.java.test.junior.service.UserService;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -18,6 +17,9 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import java.util.HashMap;
 import java.util.Map;
+
+import static com.java.test.junior.util.ResponseUtil.buildSuccessResponse;
+import static com.java.test.junior.util.ResponseUtil.getErrorResponse;
 
 @RestController
 @AllArgsConstructor
@@ -54,21 +56,5 @@ public class AuthController {
             errors.put(error.getField(), error.getDefaultMessage());
         }
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(getErrorResponse("Validation failed: " + errors));
-    }
-
-    private static Map<String, Object> buildSuccessResponse(String message, Object data) {
-        Map<String, Object> response = new HashMap<>();
-        response.put("success", true);
-        response.put("message", message);
-        response.put("data", data);
-        return response;
-    }
-
-    private static Map<String, Object> getErrorResponse(String message) {
-        Map<String, Object> response = new HashMap<>();
-        response.put("success", false);
-        response.put("message", message);
-        response.put("data", null);
-        return response;
     }
 }

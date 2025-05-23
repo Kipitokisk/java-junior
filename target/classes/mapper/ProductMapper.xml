@@ -33,4 +33,9 @@
         SELECT * FROM product
         LIMIT #{pageSize} OFFSET #{offset}
     </select>
+
+    <select id="findByName" resultMap="productResultMapper">
+        SELECT * FROM product
+        WHERE name = #{name}
+    </select>
 </mapper>

@@ -107,4 +107,14 @@ public class ProductServiceImpl implements ProductService {
         int offset = (page - 1) * pageSize;
         return productMapper.findAll(offset, pageSize);
     }
+
+    public Product findByName(String name) {
+        logger.info("Searching for product with name: {}", name);
+        Product product = productMapper.findByName(name);
+        if (product == null) {
+            logger.warn("Product not found with name: {}", name);
+            throw new ProductNotFoundException("Product not found with name: " + name);
+        }
+        return product;
+    }
 }

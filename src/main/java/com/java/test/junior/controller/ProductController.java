@@ -12,16 +12,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.FieldError;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
-import java.util.HashMap;
+import javax.validation.constraints.NotBlank;
 import java.util.List;
 import java.util.Map;
+
+import static com.java.test.junior.util.ResponseUtil.buildSuccessResponse;
+import static com.java.test.junior.util.ResponseUtil.getErrorResponse;
 
 @RestController
 @RequestMapping("/api/products")
@@ -33,13 +34,8 @@ public class ProductController {
     @PostMapping
     public ResponseEntity<?> createProduct(@Valid @RequestBody ProductDTO productDTO) {
         logger.info("POST /api/products called with: {}", productDTO);
-        try {
-            Product product = productService.createProduct(productDTO);
-            return ResponseEntity.status(HttpStatus.CREATED).body(buildSuccessResponse("Product created successfully", product));
-        } catch (RuntimeException e) {
-            logger.error("Error creating product: {}", e.getMessage());
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(getErrorResponse("Error creating product: " + e.getMessage()));
-        }
+        Product product = productService.createProduct(productDTO);
+        return ResponseEntity.status(HttpStatus.CREATED).body(buildSuccessResponse("Product created successfully", product));
     }
 
     @GetMapping("/{id}")
@@ -51,9 +47,6 @@ public class ProductController {
         } catch (ProductNotFoundException p) {
             logger.warn("Product not found: {}", p.getMessage());
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(getErrorResponse(p.getMessage()));
-        } catch (RuntimeException e) {
-            logger.error("Error retrieving product: {}", e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(getErrorResponse(e.getMessage()));
         }
     }
 
@@ -66,9 +59,6 @@ public class ProductController {
         } catch (ProductNotFoundException p) {
             logger.warn("Product not found: {}", p.getMessage());
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(getErrorResponse(p.getMessage()));
-        } catch (RuntimeException e) {
-            logger.error("Error updating product: {}", e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(getErrorResponse(e.getMessage()));
         }
     }
 
@@ -81,9 +71,6 @@ public class ProductController {
         } catch (ProductNotFoundException p) {
             logger.warn("Product not found: {}", p.getMessage());
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(getErrorResponse(p.getMessage()));
-        } catch (RuntimeException e) {
-            logger.error("Error deleting product: {}", e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(getErrorResponse(e.getMessage()));
         }
     }
 
@@ -101,35 +88,20 @@ public class ProductController {
         } catch (IllegalArgumentException i) {
             logger.warn("Invalid pagination parameters: {}", i.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(getErrorResponse(i.getMessage()));
-        } catch (RuntimeException e) {
-            logger.error("Error retrieving products: {}", e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(getErrorResponse(e.getMessage()));
         }
     }
 
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<?> handleValidationExceptions(MethodArgumentNotValidException ex) {
-        logger.warn("Validation error: {}", ex.getMessage());
-        Map<String, String> errors = new HashMap<>();
-        for (FieldError error : ex.getBindingResult().getFieldErrors()) {
-            errors.put(error.getField(), error.getDefaultMessage());
+    @GetMapping("/name/{name}")
+    public ResponseEntity<?> findProductByName(@PathVariable("name") @NotBlank String name) {
+        logger.info("GET /api/products/{} called", name);
+        try {
+            Product product = productService.findByName(name);
+            return ResponseEntity.status(HttpStatus.OK).body(buildSuccessResponse("Product retrieved successfully", product));
+        } catch (ProductNotFoundException p) {
+            logger.warn("Product not found: {}", p.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(getErrorResponse(p.getMessage()));
         }
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(getErrorResponse("Validation failed: " + errors));
     }
 
-    private static Map<String, Object> buildSuccessResponse(String message, Object data) {
-        Map<String, Object> response = new HashMap<>();
-        response.put("success", true);
-        response.put("message", message);
-        response.put("data", data);
-        return response;
-    }
 
-    private static Map<String, Object> getErrorResponse(String message) {
-        Map<String, Object> response = new HashMap<>();
-        response.put("success", false);
-        response.put("message", message);
-        response.put("data", null);
-        return response;
-    }
 }

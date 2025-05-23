@@ -13,3 +13,11 @@ databaseChangeLog:
         - sqlFile:
             path: migration/V2__create_table_user.sql
             relativeToChangelogFile: true
+  - changeSet:
+      id: 3
+      author: java-test-junior
+      changes:
+        - addUniqueConstraint:
+            tableName: product
+            columnNames: name
+            constraintName: uq_product_name
