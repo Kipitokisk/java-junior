@@ -5,18 +5,21 @@ package com.java.test.junior.service;
 
 import com.java.test.junior.exception.ResourceNotFoundException;
 import com.java.test.junior.mapper.ProductMapper;
-import com.java.test.junior.model.Product;
-import com.java.test.junior.model.ProductDTO;
-import com.java.test.junior.model.User;
+import com.java.test.junior.model.*;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+
+import static com.java.test.junior.util.ResponseUtil.buildSuccessResponse;
+import static com.java.test.junior.util.ResponseUtil.getErrorResponse;
 
 @Service
 @AllArgsConstructor
@@ -26,14 +29,14 @@ public class ProductServiceImpl implements ProductService {
     private final UserService userService;
 
     @Override
-    public ProductDTO createProduct(ProductDTO productDTO) {
+    public ResponseEntity<Response> createProduct(ProductDTO productDTO) {
         logger.info("Creating product: {}", productDTO);
         Product product = mapDTOToProduct(productDTO);
         product.setCreatedAt(LocalDateTime.now());
         product.setUpdatedAt(LocalDateTime.now());
         productMapper.save(product);
         logger.info("Product created with ID: {}", product.getId());
-        return productDTO;
+        return ResponseEntity.status(HttpStatus.CREATED).body(buildSuccessResponse("Product created successfully", productDTO));
     }
 
     private Product mapDTOToProduct(ProductDTO productDTO) {
@@ -54,23 +57,23 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public Product findProduct(Long id) {
+    public ResponseEntity<Response> findProduct(Long id) {
         logger.info("Finding product with ID: {}", id);
         Product product = productMapper.findById(id);
         if (product == null) {
             logger.warn("Product not found with ID: {}", id);
-            throw new ResourceNotFoundException("Product not found with id: " + id);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(getErrorResponse("Product not found with id: " + id));
         }
-        return product;
+        return ResponseEntity.status(HttpStatus.OK).body(buildSuccessResponse("Product retrieved successfully", product));
     }
 
     @Override
-    public Product updateProduct(Long id, ProductDTO productDTO) {
+    public ResponseEntity<Response> updateProduct(Long id, ProductDTO productDTO) {
         logger.info("Updating product with ID: {}", id);
         Product product = productMapper.findById(id);
         if (product == null) {
             logger.warn("Product not found with ID: {}", id);
-            throw new ResourceNotFoundException("Product not found with id: " + id);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(getErrorResponse("Product not found with id: " + id));
         }
         product.setName(productDTO.getName());
         product.setPrice(productDTO.getPrice());
@@ -78,23 +81,25 @@ public class ProductServiceImpl implements ProductService {
         product.setUpdatedAt(LocalDateTime.now());
         productMapper.update(product);
         logger.info("Product updated with ID: {}", id);
-        return product;
+        return ResponseEntity.status(HttpStatus.OK).body(buildSuccessResponse("Product updated successfully", product));
     }
 
     @Override
-    public void deleteProduct(Long id) {
+    public ResponseEntity<Response> deleteProduct(Long id) {
         logger.info("Deleting product with ID: {}", id);
         Product product = productMapper.findById(id);
         if (product == null) {
             logger.warn("Product not found with ID: {}", id);
-            throw new ResourceNotFoundException("Product not found with id: " + id);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(getErrorResponse("Product not found with id: " + id));
         }
         productMapper.delete(id);
         logger.info("Product deleted with ID: {}", id);
+        return ResponseEntity.status(HttpStatus.OK).body(buildSuccessResponse("Product deleted successfully", null));
+
     }
 
     @Override
-    public List<Product> findAll(int page, int pageSize) {
+    public ResponseEntity<?> findAll(int page, int pageSize) {
         logger.info("Fetching products, page: {}, pageSize: {}", page, pageSize);
         if (page < 1 || pageSize < 1) {
             logger.warn("Invalid pagination parameters: page={}, pageSize={}", page, pageSize);
@@ -102,19 +107,28 @@ public class ProductServiceImpl implements ProductService {
         }
         if (pageSize > 100) {
             logger.warn("Page size too large: {}", pageSize);
-            throw new IllegalArgumentException("Page size cannot exceed 100");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(getErrorResponse("Page size cannot exceed 100"));
         }
         int offset = (page - 1) * pageSize;
-        return productMapper.findAll(offset, pageSize);
+        List<Product> list = productMapper.findAll(offset, pageSize);
+        PaginatedResponse paginatedResponse = new PaginatedResponse();
+        paginatedResponse.setSuccess(true);
+        paginatedResponse.setMessage("Products retrieved successfully");
+        paginatedResponse.setData(list);
+        paginatedResponse.setPage(page);
+        paginatedResponse.setPageSize(pageSize);
+        return ResponseEntity.status(HttpStatus.OK).body(paginatedResponse);
+
     }
 
-    public Product findByName(String name) {
+    @Override
+    public ResponseEntity<Response> findByName(String name) {
         logger.info("Searching for product with name: {}", name);
         Product product = productMapper.findByName(name);
         if (product == null) {
             logger.warn("Product not found with name: {}", name);
-            throw new ResourceNotFoundException("Product not found with name: " + name);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(getErrorResponse("Product not found with name: " + name));
         }
-        return product;
+        return ResponseEntity.status(HttpStatus.OK).body(buildSuccessResponse("Product retrieved successfully", product));
     }
 }

@@ -5,14 +5,16 @@ package com.java.test.junior.service;
 
 import com.java.test.junior.model.Product;
 import com.java.test.junior.model.ProductDTO;
+import com.java.test.junior.model.Response;
+import org.springframework.http.ResponseEntity;
 
 import java.util.List;
 
 public interface ProductService {
-    ProductDTO createProduct(ProductDTO productDTO);
-    Product findProduct(Long id);
-    Product updateProduct(Long id, ProductDTO productDTO);
-    void deleteProduct(Long id);
-    List<Product> findAll(int page, int pageSize);
-    Product findByName(String name);
+    ResponseEntity<Response> createProduct(ProductDTO productDTO);
+    ResponseEntity<Response> findProduct(Long id);
+    ResponseEntity<Response> updateProduct(Long id, ProductDTO productDTO);
+    ResponseEntity<Response> deleteProduct(Long id);
+    ResponseEntity<?> findAll(int page, int pageSize);
+    ResponseEntity<Response> findByName(String name);
 }

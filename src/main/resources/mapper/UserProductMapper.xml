@@ -14,4 +14,8 @@
     <delete id="delete" parameterType="com.java.test.junior.model.UserProduct">
         DELETE FROM user_product WHERE user_id = #{userId} AND product_id = #{productId}
     </delete>
+
+    <select id="findById" resultMap="userProductResultMapper">
+        SELECT * FROM user_product WHERE user_id = #{userId} AND product_id = #{productId}
+    </select>
 </mapper>
