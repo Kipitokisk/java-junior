@@ -1,7 +1,6 @@
 package com.java.test.junior.service;
 
 import com.java.test.junior.mapper.UserProductMapper;
-import com.java.test.junior.model.Product;
 import com.java.test.junior.model.Response;
 import com.java.test.junior.model.User;
 import com.java.test.junior.model.UserProduct;
@@ -26,8 +25,7 @@ public class UserProductServiceImpl implements UserProductService{
 
     @Override
     public ResponseEntity<Response> save(String authentication, Long productId) {
-        String pair = new String(Base64.decodeBase64(authentication.substring(6)));
-        String username = pair.split(":")[0];
+        String username = getUsername(authentication);
         logger.info("User {} liking product: {}", username, productId);
         User user = userService.findByUsername(username);
         productService.findProduct(productId);
@@ -45,8 +43,7 @@ public class UserProductServiceImpl implements UserProductService{
 
     @Override
     public ResponseEntity<Response> delete(String authentication, Long productId) {
-        String pair = new String(Base64.decodeBase64(authentication.substring(6)));
-        String username = pair.split(":")[0];
+        String username = getUsername(authentication);
         logger.info("User {} disliking product: {}", username, productId);
         User user = userService.findByUsername(username);
         productService.findProduct(productId);
@@ -59,5 +56,11 @@ public class UserProductServiceImpl implements UserProductService{
         logger.info("User {} successfully disliked product: {}", username, productId);
         return ResponseEntity.status(HttpStatus.OK).body(buildSuccessResponse("Product disliked successfully", null));
 
+    }
+
+    private static String getUsername(String authentication) {
+        String pair = new String(Base64.decodeBase64(authentication.substring(6)));
+        String username = pair.split(":")[0];
+        return username;
     }
 }

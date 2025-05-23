@@ -13,8 +13,8 @@ import java.util.List;
 public interface ProductService {
     ResponseEntity<Response> createProduct(ProductDTO productDTO);
     ResponseEntity<Response> findProduct(Long id);
-    ResponseEntity<Response> updateProduct(Long id, ProductDTO productDTO);
-    ResponseEntity<Response> deleteProduct(Long id);
+    ResponseEntity<Response> updateProduct(Long id, ProductDTO productDTO, String authentication);
+    ResponseEntity<Response> deleteProduct(Long id, String authentication);
     ResponseEntity<?> findAll(int page, int pageSize);
     ResponseEntity<Response> findByName(String name);
 }

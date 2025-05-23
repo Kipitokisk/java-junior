@@ -38,15 +38,15 @@ public class ProductController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Response> modifyProductById(@PathVariable("id") @Min(1) Long id, @Valid @RequestBody ProductDTO productDTO) {
+    public ResponseEntity<Response> modifyProductById(@PathVariable("id") @Min(1) Long id, @Valid @RequestBody ProductDTO productDTO, @RequestHeader("Authorization") String authentication) {
         logger.info("PUT /api/products/{} called with: {}", id, productDTO);
-        return productService.updateProduct(id, productDTO);
+        return productService.updateProduct(id, productDTO, authentication);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Response> deleteProduct(@PathVariable("id") @Min(1) Long id) {
+    public ResponseEntity<Response> deleteProduct(@PathVariable("id") @Min(1) Long id, @RequestHeader("Authorization") String authentication) {
         logger.info("DELETE /api/products/{} called", id);
-        return productService.deleteProduct(id);
+        return productService.deleteProduct(id, authentication);
     }
 
     @GetMapping

@@ -5,8 +5,10 @@ package com.java.test.junior.service;
 
 import com.java.test.junior.exception.ResourceNotFoundException;
 import com.java.test.junior.mapper.ProductMapper;
+import com.java.test.junior.mapper.UserProductMapper;
 import com.java.test.junior.model.*;
 import lombok.AllArgsConstructor;
+import org.apache.tomcat.util.codec.binary.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -27,6 +29,7 @@ public class ProductServiceImpl implements ProductService {
     private static final Logger logger = LoggerFactory.getLogger(ProductServiceImpl.class);
     private final ProductMapper productMapper;
     private final UserService userService;
+    private final UserProductMapper userProductMapper;
 
     @Override
     public ResponseEntity<Response> createProduct(ProductDTO productDTO) {
@@ -49,7 +52,7 @@ public class ProductServiceImpl implements ProductService {
 
         User user = userService.findByUsername(username);
         if (user == null) {
-            throw new RuntimeException("Authenticated user not found in database");
+            throw new ResourceNotFoundException("Authenticated user not found in database");
         }
         product.setUserId(user.getId());
 
@@ -68,12 +71,19 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public ResponseEntity<Response> updateProduct(Long id, ProductDTO productDTO) {
+    public ResponseEntity<Response> updateProduct(Long id, ProductDTO productDTO, String authentication) {
+        String username = getUsername(authentication);
+        Long userId = userService.findByUsername(username).getId();
         logger.info("Updating product with ID: {}", id);
         Product product = productMapper.findById(id);
         if (product == null) {
             logger.warn("Product not found with ID: {}", id);
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(getErrorResponse("Product not found with id: " + id));
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(getErrorResponse("Product not found with id: " + id));
+        } else if (!product.getUserId().equals(userId)) {
+            logger.warn("User with id {} doesn't have access to product with ID: {}", userId, id);
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(getErrorResponse("User is not authorized to access this product."));
         }
         product.setName(productDTO.getName());
         product.setPrice(productDTO.getPrice());
@@ -85,13 +95,20 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public ResponseEntity<Response> deleteProduct(Long id) {
+    public ResponseEntity<Response> deleteProduct(Long id, String authentication) {
+        String username = getUsername(authentication);
+        Long userId = userService.findByUsername(username).getId();
         logger.info("Deleting product with ID: {}", id);
         Product product = productMapper.findById(id);
         if (product == null) {
             logger.warn("Product not found with ID: {}", id);
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(getErrorResponse("Product not found with id: " + id));
+        } else if (!product.getUserId().equals(userId)) {
+            logger.warn("User with id {} doesn't have access to product with ID: {}", userId, id);
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(getErrorResponse("User is not authorized to access this product."));
         }
+        userProductMapper.deleteByProductId(id);
         productMapper.delete(id);
         logger.info("Product deleted with ID: {}", id);
         return ResponseEntity.status(HttpStatus.OK).body(buildSuccessResponse("Product deleted successfully", null));
@@ -130,5 +147,10 @@ public class ProductServiceImpl implements ProductService {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(getErrorResponse("Product not found with name: " + name));
         }
         return ResponseEntity.status(HttpStatus.OK).body(buildSuccessResponse("Product retrieved successfully", product));
+    }
+
+    private static String getUsername(String authentication) {
+        String pair = new String(Base64.decodeBase64(authentication.substring(6)));
+        return pair.split(":")[0];
     }
 }
