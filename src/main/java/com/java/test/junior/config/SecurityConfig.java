@@ -25,6 +25,7 @@ public class SecurityConfig {
                 .authorizeRequests()
                 .antMatchers("/api/auth/**").permitAll()
                 .antMatchers(SWAGGER_WHITELIST).permitAll()
+                .antMatchers("/api/products/**").hasAuthority("USER")
                 .anyRequest().authenticated()
                 .and()
                 .httpBasic()

@@ -28,3 +28,13 @@ databaseChangeLog:
         - sqlFile:
             path: migration/V3__create_table_user_product.sql
             relativeToChangelogFile: true
+  - changeSet:
+      id: 5
+      author: java-test-junior
+      changes:
+        - addColumn:
+            tableName: user
+            columns:
+              - column:
+                  name: role
+                  type: varchar(10)

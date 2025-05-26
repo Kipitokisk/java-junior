@@ -11,11 +11,12 @@
         <result property="password" column="password"/>
         <result property="createdAt" column="created_at"/>
         <result property="updatedAt" column="updated_at"/>
+        <result property="role" column="role"/>
     </resultMap>
 
     <insert id="save" parameterType="com.java.test.junior.model.User">
-        INSERT INTO "user" (username, password, created_at, updated_at)
-        VALUES (#{username}, #{password}, NOW(), NOW())
+        INSERT INTO "user" (username, password, created_at, updated_at, role)
+        VALUES (#{username}, #{password}, NOW(), NOW(), #{role})
     </insert>
 
     <update id="update" parameterType="com.java.test.junior.model.User">
@@ -29,5 +30,9 @@
 
     <select id="findByUsername" resultMap="userResultMapper">
         SELECT * FROM "user" WHERE username = #{username}
+    </select>
+
+    <select id="countByRole">
+        SELECT count(*) FROM "user" WHERE role = #{role}
     </select>
 </mapper>

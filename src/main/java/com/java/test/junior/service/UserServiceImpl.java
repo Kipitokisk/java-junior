@@ -1,6 +1,5 @@
 package com.java.test.junior.service;
 
-import com.java.test.junior.exception.ResourceAlreadyExistsException;
 import com.java.test.junior.exception.ResourceNotFoundException;
 import com.java.test.junior.mapper.UserMapper;
 import com.java.test.junior.model.Response;
@@ -15,7 +14,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
-import java.util.Collection;
 import java.util.Collections;
 
 import static com.java.test.junior.util.ResponseUtil.buildSuccessResponse;
@@ -46,6 +44,7 @@ public class UserServiceImpl implements UserService{
         User user = new User();
         user.setUsername(userDTO.getUsername());
         user.setPassword(passwordEncoder.encode(userDTO.getPassword()));
+        user.setRole("USER");
 
         if (!StringUtils.hasText(user.getUsername())) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(getErrorResponse("Username is required"));

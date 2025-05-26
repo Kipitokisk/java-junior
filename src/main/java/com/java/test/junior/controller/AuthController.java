@@ -18,7 +18,6 @@ import javax.validation.Valid;
 public class AuthController {
     private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
     private UserService userService;
-    private PasswordEncoder passwordEncoder;
 
     @PostMapping("/register")
     public ResponseEntity<Response> register(@Valid @RequestBody UserDTO userDTO) {

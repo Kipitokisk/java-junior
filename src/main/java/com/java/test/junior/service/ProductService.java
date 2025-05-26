@@ -3,12 +3,10 @@
  */
 package com.java.test.junior.service;
 
-import com.java.test.junior.model.Product;
 import com.java.test.junior.model.ProductDTO;
 import com.java.test.junior.model.Response;
 import org.springframework.http.ResponseEntity;
 
-import java.util.List;
 
 public interface ProductService {
     ResponseEntity<Response> createProduct(ProductDTO productDTO);

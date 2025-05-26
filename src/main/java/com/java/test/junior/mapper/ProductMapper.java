@@ -1,7 +1,3 @@
-/*
- * Copyright (c) 2013-2022 Global Database Ltd, All rights reserved.
- */
-
 package com.java.test.junior.mapper;
 
 import com.java.test.junior.model.Product;
