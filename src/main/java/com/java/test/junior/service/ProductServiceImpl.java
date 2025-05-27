@@ -149,7 +149,7 @@ public class ProductServiceImpl implements ProductService {
         return ResponseEntity.status(HttpStatus.OK).body(buildSuccessResponse("Product retrieved successfully", product));
     }
 
-    private static String getUsername(String authentication) {
+    private String getUsername(String authentication) {
         String pair = new String(Base64.decodeBase64(authentication.substring(6)));
 
         return pair.split(":")[0];
