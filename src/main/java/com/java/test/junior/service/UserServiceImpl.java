@@ -13,12 +13,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
-
 import java.util.Collections;
 
 import static com.java.test.junior.util.ResponseUtil.buildSuccessResponse;
-import static com.java.test.junior.util.ResponseUtil.getErrorResponse;
 
 @Service
 @AllArgsConstructor
@@ -26,10 +23,6 @@ public class UserServiceImpl implements UserService{
     private static final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
     private final UserMapper userMapper;
     private PasswordEncoder passwordEncoder;
-
-    public User findById(Long id) {
-        return userMapper.findById(id);
-    }
 
     public User findByUsername(String username) {
         logger.info("Finding user with username: {}", username);
@@ -52,6 +45,8 @@ public class UserServiceImpl implements UserService{
     }
 
     public ResponseEntity<Response> save(UserDTO userDTO) {
+        logger.info("Registration called with: {}", userDTO);
+
         User user = new User();
         user.setUsername(userDTO.getUsername());
         user.setPassword(passwordEncoder.encode(userDTO.getPassword()));
@@ -63,10 +58,6 @@ public class UserServiceImpl implements UserService{
         }
         userMapper.save(user);
         return ResponseEntity.status(HttpStatus.OK).body(buildSuccessResponse("User registered successfully", Collections.singletonMap("username", user.getUsername())));
-    }
-
-    public void update(User user) {
-        userMapper.update(user);
     }
 
     public void delete(Long id) {

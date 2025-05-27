@@ -86,9 +86,9 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public ResponseEntity<Response> updateProduct(Long id, ProductDTO productDTO, String authentication) {
+        logger.info("Updating product with ID: {}", id);
         String username = getUsername(authentication);
         Long userId = userService.findByUsername(username).getId();
-        logger.info("Updating product with ID: {}", id);
         Product product = productMapper.findById(id);
         if (product == null) {
             logger.warn("Product not found with ID: {}", id);
@@ -108,9 +108,9 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public ResponseEntity<Response> deleteProduct(Long id, String authentication) {
+        logger.info("Deleting product with ID: {}", id);
         String username = getUsername(authentication);
         Long userId = userService.findByUsername(username).getId();
-        logger.info("Deleting product with ID: {}", id);
         Product product = productMapper.findById(id);
         if (product == null) {
             logger.warn("Product not found with ID: {}", id);
@@ -157,6 +157,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public ResponseEntity<Response> loadProductsFromCsv(String fileLocation) throws SQLException{
+        logger.info("Loading products from CSV with path: {}", fileLocation);
         try {
             long adminUserId = userService.findByRole("ADMIN").getId();
 

@@ -7,7 +7,6 @@ import com.java.test.junior.model.ProductDTO;
 import com.java.test.junior.model.Response;
 import org.springframework.http.ResponseEntity;
 
-import java.io.IOException;
 import java.sql.SQLException;
 
 

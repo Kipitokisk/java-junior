@@ -29,25 +29,21 @@ public class ProductController {
 
     @PostMapping
     public ResponseEntity<Response> createProduct(@Valid @RequestBody ProductDTO productDTO) {
-        logger.info("POST /api/products called with: {}", productDTO);
         return productService.createProduct(productDTO);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<Response> findProductById(@PathVariable("id") @Min(1) Long id) {
-        logger.info("GET /api/products/{} called", id);
         return productService.findProduct(id);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<Response> modifyProductById(@PathVariable("id") @Min(1) Long id, @Valid @RequestBody ProductDTO productDTO, @RequestHeader("Authorization") String authentication) {
-        logger.info("PUT /api/products/{} called with: {}", id, productDTO);
         return productService.updateProduct(id, productDTO, authentication);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Response> deleteProduct(@PathVariable("id") @Min(1) Long id, @RequestHeader("Authorization") String authentication) {
-        logger.info("DELETE /api/products/{} called", id);
         return productService.deleteProduct(id, authentication);
     }
 
@@ -55,13 +51,11 @@ public class ProductController {
     public ResponseEntity<?> findAll(
             @RequestParam(defaultValue = "1") @Min(value = 1, message = "Page must be at least 1") int page,
             @RequestParam(defaultValue = "10") @Min(value = 1, message = "Page size must be at least 1") @Max(value = 100, message = "Page size cannot exceed 100") int pageSize) {
-        logger.info("GET /api/products called with page={}, pageSize={}", page, pageSize);
         return productService.findAll(page, pageSize);
     }
 
     @GetMapping("/name/{name}")
     public ResponseEntity<Response> findProductByName(@PathVariable("name") String name) {
-        logger.info("GET /api/products/name/{} called", name);
         return productService.findByName(name);
     }
 
