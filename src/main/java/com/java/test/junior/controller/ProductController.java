@@ -11,6 +11,7 @@ import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -19,6 +20,7 @@ import javax.validation.constraints.Min;
 
 @RestController
 @RequestMapping("/api/products")
+@Validated
 @AllArgsConstructor
 public class ProductController {
     private static final Logger logger = LoggerFactory.getLogger(ProductController.class);

@@ -3,6 +3,7 @@
  */
 package com.java.test.junior.service;
 
+import com.java.test.junior.exception.ForbiddenException;
 import com.java.test.junior.exception.ResourceNotFoundException;
 import com.java.test.junior.mapper.ProductMapper;
 import com.java.test.junior.mapper.UserProductMapper;
@@ -64,6 +65,7 @@ public class ProductServiceImpl implements ProductService {
 
         User user = userService.findByUsername(username);
         if (user == null) {
+            logger.warn("User not found with username: {}", username);
             throw new ResourceNotFoundException("Authenticated user not found in database");
         }
         product.setUserId(user.getId());
@@ -77,7 +79,7 @@ public class ProductServiceImpl implements ProductService {
         Product product = productMapper.findById(id);
         if (product == null) {
             logger.warn("Product not found with ID: {}", id);
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(getErrorResponse("Product not found with id: " + id));
+            throw new ResourceNotFoundException("Product not found with ID: " + id);
         }
         return ResponseEntity.status(HttpStatus.OK).body(buildSuccessResponse("Product retrieved successfully", product));
     }
@@ -90,12 +92,10 @@ public class ProductServiceImpl implements ProductService {
         Product product = productMapper.findById(id);
         if (product == null) {
             logger.warn("Product not found with ID: {}", id);
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(getErrorResponse("Product not found with id: " + id));
+            throw new ResourceNotFoundException("Product not found with ID: " + id);
         } else if (!product.getUserId().equals(userId)) {
             logger.warn("User with id {} doesn't have access to product with ID: {}", userId, id);
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body(getErrorResponse("User is not authorized to access this product."));
+            throw new ForbiddenException("User with id " + userId + "doesn't have access to product with ID: " + id);
         }
         product.setName(productDTO.getName());
         product.setPrice(productDTO.getPrice());
@@ -114,40 +114,27 @@ public class ProductServiceImpl implements ProductService {
         Product product = productMapper.findById(id);
         if (product == null) {
             logger.warn("Product not found with ID: {}", id);
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(getErrorResponse("Product not found with id: " + id));
+            throw new ResourceNotFoundException("Product nout found with ID: " + id);
         } else if (!product.getUserId().equals(userId)) {
             logger.warn("User with id {} doesn't have access to product with ID: {}", userId, id);
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body(getErrorResponse("User is not authorized to access this product."));
+            throw new ForbiddenException("User with id " + userId + "doesn't have access to product with ID: " + id);
         }
         userProductMapper.deleteByProductId(id);
         productMapper.delete(id);
         logger.info("Product deleted with ID: {}", id);
-        return ResponseEntity.status(HttpStatus.OK).body(buildSuccessResponse("Product deleted successfully", null));
 
+        return ResponseEntity.status(HttpStatus.OK).body(buildSuccessResponse("Product deleted successfully", null));
     }
 
     @Override
     public ResponseEntity<?> findAll(int page, int pageSize) {
         logger.info("Fetching products, page: {}, pageSize: {}", page, pageSize);
-        if (page < 1 || pageSize < 1) {
-            logger.warn("Invalid pagination parameters: page={}, pageSize={}", page, pageSize);
-            throw new IllegalArgumentException("Page and page size must be equal or greater than 1");
-        }
-        if (pageSize > 100) {
-            logger.warn("Page size too large: {}", pageSize);
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(getErrorResponse("Page size cannot exceed 100"));
-        }
         int offset = (page - 1) * pageSize;
         List<Product> list = productMapper.findAll(offset, pageSize);
-        PaginatedResponse paginatedResponse = new PaginatedResponse();
-        paginatedResponse.setSuccess(true);
-        paginatedResponse.setMessage("Products retrieved successfully");
-        paginatedResponse.setData(list);
-        paginatedResponse.setPage(page);
-        paginatedResponse.setPageSize(pageSize);
-        return ResponseEntity.status(HttpStatus.OK).body(paginatedResponse);
+        String message = "Products retrieved successfully";
+        PaginatedResponse paginatedResponse = new PaginatedResponse(true, message, list, page, pageSize);
 
+        return ResponseEntity.status(HttpStatus.OK).body(paginatedResponse);
     }
 
     @Override
@@ -158,11 +145,13 @@ public class ProductServiceImpl implements ProductService {
             logger.warn("Product not found with name: {}", name);
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(getErrorResponse("Product not found with name: " + name));
         }
+
         return ResponseEntity.status(HttpStatus.OK).body(buildSuccessResponse("Product retrieved successfully", product));
     }
 
     private static String getUsername(String authentication) {
         String pair = new String(Base64.decodeBase64(authentication.substring(6)));
+
         return pair.split(":")[0];
     }
 
@@ -187,7 +176,7 @@ public class ProductServiceImpl implements ProductService {
         }
     }
 
-    private static void deleteTempFile(File tempFile) {
+    private void deleteTempFile(File tempFile) {
         try {
             Files.delete(tempFile.toPath());
             logger.info("Temporary file deleted.");
@@ -209,7 +198,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
 
-    private static File getTempFile(InputStream inputStream, long adminUserId) throws IOException {
+    private File getTempFile(InputStream inputStream, long adminUserId) throws IOException {
         File tempFile = Files.createTempFile("processed-products", ".csv").toFile();
         LocalDateTime now = LocalDateTime.now();
         String nowStr = now.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
@@ -228,7 +217,7 @@ public class ProductServiceImpl implements ProductService {
         return tempFile;
     }
 
-    private static InputStream getInputStream(String fileLocation) throws IOException {
+    private InputStream getInputStream(String fileLocation) throws IOException {
         InputStream inputStream;
         if (fileLocation.startsWith("http://") || fileLocation.startsWith("https://")) {
             inputStream = new URL(fileLocation).openStream();

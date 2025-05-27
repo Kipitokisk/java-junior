@@ -1,5 +1,7 @@
 package com.java.test.junior.service;
 
+import com.java.test.junior.exception.ResourceAlreadyExistsException;
+import com.java.test.junior.exception.ResourceNotFoundException;
 import com.java.test.junior.mapper.UserProductMapper;
 import com.java.test.junior.model.Response;
 import com.java.test.junior.model.User;
@@ -13,7 +15,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import static com.java.test.junior.util.ResponseUtil.buildSuccessResponse;
-import static com.java.test.junior.util.ResponseUtil.getErrorResponse;
 
 @Service
 @AllArgsConstructor
@@ -32,13 +33,13 @@ public class UserProductServiceImpl implements UserProductService{
         UserProduct userProduct = userProductMapper.findById(user.getId(), productId);
         if (userProduct != null) {
             logger.warn("User already liked product with ID {}", productId);
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(getErrorResponse("User already liked product with ID " + productId));
+            throw new ResourceAlreadyExistsException("User already liked product with ID " + productId);
         }
         UserProduct userProductFinal = new UserProduct(user.getId(), productId);
         userProductMapper.save(userProductFinal);
         logger.info("User {} successfully liked product: {}", username, productId);
-        return ResponseEntity.status(HttpStatus.OK).body(buildSuccessResponse("Product liked successfully", null));
 
+        return ResponseEntity.status(HttpStatus.OK).body(buildSuccessResponse("Product liked successfully", null));
     }
 
     @Override
@@ -50,17 +51,18 @@ public class UserProductServiceImpl implements UserProductService{
         UserProduct userProduct = userProductMapper.findById(user.getId(), productId);
         if (userProduct == null) {
             logger.warn("User doesn't have product with ID {} liked", productId);
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(getErrorResponse("User doesn't have product with ID " + productId + " liked"));
+            throw new ResourceNotFoundException("User doesn't have product with ID " + productId + " liked");
         }
         userProductMapper.delete(userProduct);
         logger.info("User {} successfully disliked product: {}", username, productId);
-        return ResponseEntity.status(HttpStatus.OK).body(buildSuccessResponse("Product disliked successfully", null));
 
+        return ResponseEntity.status(HttpStatus.OK).body(buildSuccessResponse("Product disliked successfully", null));
     }
 
     private static String getUsername(String authentication) {
         String pair = new String(Base64.decodeBase64(authentication.substring(6)));
         String username = pair.split(":")[0];
+
         return username;
     }
 }

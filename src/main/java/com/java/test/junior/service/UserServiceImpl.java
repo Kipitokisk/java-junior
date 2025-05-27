@@ -1,5 +1,6 @@
 package com.java.test.junior.service;
 
+import com.java.test.junior.exception.ResourceAlreadyExistsException;
 import com.java.test.junior.exception.ResourceNotFoundException;
 import com.java.test.junior.mapper.UserMapper;
 import com.java.test.junior.model.Response;
@@ -56,19 +57,9 @@ public class UserServiceImpl implements UserService{
         user.setPassword(passwordEncoder.encode(userDTO.getPassword()));
         user.setRole("USER");
 
-        if (!StringUtils.hasText(user.getUsername())) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(getErrorResponse("Username is required"));
-        }
-        if (!StringUtils.hasText(user.getPassword())) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(getErrorResponse("Password is required"));
-        }
-        if (user.getPassword().length() < 6) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(getErrorResponse("Password must be at least 6 characters"));
-        }
-
         User existingUser = userMapper.findByUsername(user.getUsername());
         if (existingUser != null) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(getErrorResponse("Username '" + user.getUsername() + "' is already taken"));
+            throw new ResourceAlreadyExistsException("Username '" + user.getUsername() + "' is already taken");
         }
         userMapper.save(user);
         return ResponseEntity.status(HttpStatus.OK).body(buildSuccessResponse("User registered successfully", Collections.singletonMap("username", user.getUsername())));
