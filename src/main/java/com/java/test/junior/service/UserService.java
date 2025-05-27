@@ -11,4 +11,5 @@ public interface UserService {
     ResponseEntity<Response> save(UserDTO userDTO);
     void update(User user);
     void delete(Long id);
+    User findByRole(String role);
 }

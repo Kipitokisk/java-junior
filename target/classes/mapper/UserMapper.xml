@@ -35,4 +35,8 @@
     <select id="countByRole">
         SELECT count(*) FROM "user" WHERE role = #{role}
     </select>
+
+    <select id="findByRole" resultMap="userResultMapper">
+        SELECT * FROM "user" where role = #{role}
+    </select>
 </mapper>

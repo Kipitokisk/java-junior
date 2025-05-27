@@ -12,6 +12,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -47,6 +48,13 @@ public class GlobalExceptionHandler {
                 .body(getErrorResponse("Error creating product: " + userMessage));
     }
 
+    @ExceptionHandler(SQLException.class)
+    public ResponseEntity<Response> handleSQLException(SQLException ex) {
+        logger.warn("Database error occurred: {}", ex.getMessage());
+
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(getErrorResponse("Database error: " + extractPostgresMessage(ex.getMessage())));
+    }
 
 
     private String extractPostgresMessage(String message) {

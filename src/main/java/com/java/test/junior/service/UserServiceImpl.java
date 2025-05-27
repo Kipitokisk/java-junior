@@ -34,8 +34,18 @@ public class UserServiceImpl implements UserService{
         logger.info("Finding user with username: {}", username);
         User user = userMapper.findByUsername(username);
         if (user == null) {
-            logger.warn("Product not found with username: {}", username);
-            throw new ResourceNotFoundException("Product not found with username: " + username);
+            logger.warn("User not found with username: {}", username);
+            throw new ResourceNotFoundException("User not found with username: " + username);
+        }
+        return user;
+    }
+
+    public User findByRole(String role) {
+        logger.info("Finding users with role: {}", role);
+        User user = userMapper.findByRole(role);
+        if (user == null) {
+            logger.warn("User not found with role: {}", role);
+            throw new ResourceNotFoundException("User not found with role: " + role);
         }
         return user;
     }

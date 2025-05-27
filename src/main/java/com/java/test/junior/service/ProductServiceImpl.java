@@ -9,15 +9,26 @@ import com.java.test.junior.mapper.UserProductMapper;
 import com.java.test.junior.model.*;
 import lombok.AllArgsConstructor;
 import org.apache.tomcat.util.codec.binary.Base64;
+import org.postgresql.copy.CopyManager;
+import org.postgresql.core.BaseConnection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.jdbc.CannotGetJdbcConnectionException;
+import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
+import javax.sql.DataSource;
+import java.io.*;
+import java.net.URL;
+import java.nio.file.Files;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 import static com.java.test.junior.util.ResponseUtil.buildSuccessResponse;
@@ -30,6 +41,7 @@ public class ProductServiceImpl implements ProductService {
     private final ProductMapper productMapper;
     private final UserService userService;
     private final UserProductMapper userProductMapper;
+    private final DataSource dataSource;
 
     @Override
     public ResponseEntity<Response> createProduct(ProductDTO productDTO) {
@@ -152,5 +164,77 @@ public class ProductServiceImpl implements ProductService {
     private static String getUsername(String authentication) {
         String pair = new String(Base64.decodeBase64(authentication.substring(6)));
         return pair.split(":")[0];
+    }
+
+    @Override
+    public ResponseEntity<Response> loadProductsFromCsv(String fileLocation) throws SQLException{
+        try {
+            long adminUserId = userService.findByRole("ADMIN").getId();
+
+            InputStream inputStream = getInputStream(fileLocation);
+
+            File tempFile = getTempFile(inputStream, adminUserId);
+
+            copy(tempFile);
+
+            deleteTempFile(tempFile);
+
+            return ResponseEntity.status(HttpStatus.OK).body(buildSuccessResponse("CSV file copied successfully", null));
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(getErrorResponse("Failed to read the CSV file"));
+        } catch (CannotGetJdbcConnectionException e) {
+            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(getErrorResponse("Database connection failed"));
+        }
+    }
+
+    private static void deleteTempFile(File tempFile) {
+        try {
+            Files.delete(tempFile.toPath());
+            logger.info("Temporary file deleted.");
+        } catch (IOException e) {
+            logger.warn("Failed to delete temporary file: {}", e.getMessage(), e);
+        }
+    }
+
+    private void copy(File tempFile) throws SQLException, IOException {
+        Connection conn = DataSourceUtils.getConnection(dataSource);
+        CopyManager copyManager = new CopyManager(conn.unwrap(BaseConnection.class));
+
+        try (Reader processedReader = new FileReader(tempFile)) {
+            copyManager.copyIn(
+                    "COPY product(name, price, description, user_id, created_at, updated_at) FROM STDIN WITH (FORMAT csv, HEADER true)",
+                    processedReader
+            );
+        }
+    }
+
+
+    private static File getTempFile(InputStream inputStream, long adminUserId) throws IOException {
+        File tempFile = Files.createTempFile("processed-products", ".csv").toFile();
+        LocalDateTime now = LocalDateTime.now();
+        String nowStr = now.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+
+        try(BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+            BufferedWriter writer = new BufferedWriter(new FileWriter(tempFile))) {
+
+            reader.readLine();
+            writer.write("name,price,description,user_id,created_at,updated_at\n");
+
+            String line;
+            while ((line = reader.readLine()) != null) {
+                writer.write(line + "," + adminUserId + "," + nowStr + "," + nowStr + "\n");
+            }
+        }
+        return tempFile;
+    }
+
+    private static InputStream getInputStream(String fileLocation) throws IOException {
+        InputStream inputStream;
+        if (fileLocation.startsWith("http://") || fileLocation.startsWith("https://")) {
+            inputStream = new URL(fileLocation).openStream();
+        } else {
+            inputStream = new FileInputStream(fileLocation);
+        }
+        return inputStream;
     }
 }

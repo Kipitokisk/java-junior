@@ -9,4 +9,5 @@ public interface UserMapper {
     void update(User user);
     void delete(Long id);
     int countByRole(String role);
+    User findByRole(String role);
 }

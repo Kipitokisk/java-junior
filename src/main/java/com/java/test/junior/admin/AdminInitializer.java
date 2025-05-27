@@ -15,6 +15,7 @@ public class AdminInitializer implements ApplicationRunner {
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
     private static final Logger logger = LoggerFactory.getLogger(AdminInitializer.class);
+    private static final String ADMIN_PASSWORD = System.getenv("ADMIN_PASSWORD");
 
 
     public AdminInitializer(UserMapper userMapper, PasswordEncoder passwordEncoder) {
@@ -29,7 +30,7 @@ public class AdminInitializer implements ApplicationRunner {
         if (adminCount == 0) {
             User admin = new User();
             admin.setUsername("admin");
-            admin.setPassword(passwordEncoder.encode("admin123"));
+            admin.setPassword(passwordEncoder.encode(ADMIN_PASSWORD));
             admin.setRole("ADMIN");
 
             userMapper.save(admin);

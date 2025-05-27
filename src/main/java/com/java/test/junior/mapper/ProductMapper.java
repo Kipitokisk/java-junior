@@ -6,11 +6,6 @@ import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
-/**
- * @author dumitru.beselea
- * @version java-test-junior
- * @apiNote 08.12.2022
- */
 @Mapper
 public interface ProductMapper {
     Product findById(@Param("id") Long id);
