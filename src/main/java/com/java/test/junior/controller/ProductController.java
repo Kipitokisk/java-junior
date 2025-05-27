@@ -3,6 +3,7 @@
  */
 package com.java.test.junior.controller;
 
+import com.java.test.junior.model.PaginatedResponse;
 import com.java.test.junior.model.ProductDTO;
 import com.java.test.junior.model.Response;
 import com.java.test.junior.service.ProductService;
@@ -48,7 +49,7 @@ public class ProductController {
     }
 
     @GetMapping
-    public ResponseEntity<?> findAll(
+    public ResponseEntity<PaginatedResponse> findAll(
             @RequestParam(defaultValue = "1") @Min(value = 1, message = "Page must be at least 1") int page,
             @RequestParam(defaultValue = "10") @Min(value = 1, message = "Page size must be at least 1") @Max(value = 100, message = "Page size cannot exceed 100") int pageSize) {
         return productService.findAll(page, pageSize);

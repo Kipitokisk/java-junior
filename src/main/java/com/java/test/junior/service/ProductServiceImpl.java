@@ -78,7 +78,7 @@ public class ProductServiceImpl implements ProductService {
         logger.info("Finding product with ID: {}", id);
         Product product = productMapper.findById(id);
         if (product == null) {
-            logger.warn("Product not found with ID: {}", id);
+            productNotFound(id);
             throw new ResourceNotFoundException("Product not found with ID: " + id);
         }
         return ResponseEntity.status(HttpStatus.OK).body(buildSuccessResponse("Product retrieved successfully", product));
@@ -91,10 +91,10 @@ public class ProductServiceImpl implements ProductService {
         Long userId = userService.findByUsername(username).getId();
         Product product = productMapper.findById(id);
         if (product == null) {
-            logger.warn("Product not found with ID: {}", id);
+            productNotFound(id);
             throw new ResourceNotFoundException("Product not found with ID: " + id);
         } else if (!product.getUserId().equals(userId)) {
-            logger.warn("User with id {} doesn't have access to product with ID: {}", userId, id);
+            noAccess(id, userId);
             throw new ForbiddenException("User with id " + userId + "doesn't have access to product with ID: " + id);
         }
         product.setName(productDTO.getName());
@@ -106,6 +106,14 @@ public class ProductServiceImpl implements ProductService {
         return ResponseEntity.status(HttpStatus.OK).body(buildSuccessResponse("Product updated successfully", product));
     }
 
+    private void noAccess(Long id, Long userId) {
+        logger.warn("User with id {} doesn't have access to product with ID: {}", userId, id);
+    }
+
+    private void productNotFound(Long id) {
+        logger.warn("Product not found with ID: {}", id);
+    }
+
     @Override
     public ResponseEntity<Response> deleteProduct(Long id, String authentication) {
         logger.info("Deleting product with ID: {}", id);
@@ -113,10 +121,10 @@ public class ProductServiceImpl implements ProductService {
         Long userId = userService.findByUsername(username).getId();
         Product product = productMapper.findById(id);
         if (product == null) {
-            logger.warn("Product not found with ID: {}", id);
-            throw new ResourceNotFoundException("Product nout found with ID: " + id);
+            productNotFound(id);
+            throw new ResourceNotFoundException("Product not found with ID: " + id);
         } else if (!product.getUserId().equals(userId)) {
-            logger.warn("User with id {} doesn't have access to product with ID: {}", userId, id);
+            noAccess(id, userId);
             throw new ForbiddenException("User with id " + userId + "doesn't have access to product with ID: " + id);
         }
         userProductMapper.deleteByProductId(id);
@@ -127,7 +135,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public ResponseEntity<?> findAll(int page, int pageSize) {
+    public ResponseEntity<PaginatedResponse> findAll(int page, int pageSize) {
         logger.info("Fetching products, page: {}, pageSize: {}", page, pageSize);
         int offset = (page - 1) * pageSize;
         List<Product> list = productMapper.findAll(offset, pageSize);

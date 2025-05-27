@@ -61,8 +61,6 @@ public class UserProductServiceImpl implements UserProductService{
 
     private static String getUsername(String authentication) {
         String pair = new String(Base64.decodeBase64(authentication.substring(6)));
-        String username = pair.split(":")[0];
-
-        return username;
+        return pair.split(":")[0];
     }
 }

@@ -3,6 +3,7 @@
  */
 package com.java.test.junior.service;
 
+import com.java.test.junior.model.PaginatedResponse;
 import com.java.test.junior.model.ProductDTO;
 import com.java.test.junior.model.Response;
 import org.springframework.http.ResponseEntity;
@@ -15,7 +16,7 @@ public interface ProductService {
     ResponseEntity<Response> findProduct(Long id);
     ResponseEntity<Response> updateProduct(Long id, ProductDTO productDTO, String authentication);
     ResponseEntity<Response> deleteProduct(Long id, String authentication);
-    ResponseEntity<?> findAll(int page, int pageSize);
+    ResponseEntity<PaginatedResponse> findAll(int page, int pageSize);
     ResponseEntity<Response> findByName(String name);
     ResponseEntity<Response> loadProductsFromCsv(String fileLocation) throws SQLException;
 }
