@@ -38,4 +38,9 @@
         SELECT * FROM product
         WHERE name = #{name}
     </select>
+
+    <delete id="deleteAllByUserId" parameterType="long">
+        DELETE FROM product WHERE user_id = #{userId}
+    </delete>
+
 </mapper>

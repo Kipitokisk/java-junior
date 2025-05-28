@@ -19,4 +19,5 @@ public interface ProductService {
     ResponseEntity<PaginatedResponse> findAll(int page, int pageSize);
     ResponseEntity<Response> findByName(String name);
     ResponseEntity<Response> loadProductsFromCsv(String fileLocation) throws SQLException;
+    void deleteAllByUserId(Long id);
 }

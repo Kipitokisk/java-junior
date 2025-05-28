@@ -185,6 +185,11 @@ public class ProductServiceImpl implements ProductService {
         }
     }
 
+    @Override
+    public void deleteAllByUserId(Long id) {
+        productMapper.deleteAllByUserId(id);
+    }
+
     private void deleteTempFile(File tempFile) {
         try {
             Files.delete(tempFile.toPath());

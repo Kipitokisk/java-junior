@@ -2,6 +2,7 @@ package com.java.test.junior.admin;
 
 import com.java.test.junior.mapper.UserMapper;
 import com.java.test.junior.model.User;
+import org.springframework.beans.factory.annotation.Value;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.ApplicationArguments;
@@ -15,7 +16,8 @@ public class AdminInitializer implements ApplicationRunner {
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
     private static final Logger logger = LoggerFactory.getLogger(AdminInitializer.class);
-    private static final String ADMIN_PASSWORD = System.getenv("ADMIN_PASSWORD");
+    @Value("${admin.default.password}")
+    private String adminPassword;
 
 
     public AdminInitializer(UserMapper userMapper, PasswordEncoder passwordEncoder) {
@@ -30,7 +32,7 @@ public class AdminInitializer implements ApplicationRunner {
         if (adminCount == 0) {
             User admin = new User();
             admin.setUsername("admin");
-            admin.setPassword(passwordEncoder.encode(ADMIN_PASSWORD));
+            admin.setPassword(passwordEncoder.encode(adminPassword));
             admin.setRole("ADMIN");
 
             userMapper.save(admin);

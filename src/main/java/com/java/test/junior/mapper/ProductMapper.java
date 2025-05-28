@@ -14,4 +14,5 @@ public interface ProductMapper {
     void delete(@Param("id") Long id);
     Product findByName(@Param("name") String name);
     List<Product> findAll(@Param("offset") int offset, @Param("pageSize") int pageSize);
+    void deleteAllByUserId(Long id);
 }
