@@ -6,7 +6,6 @@ import com.java.test.junior.mapper.UserMapper;
 import com.java.test.junior.model.Response;
 import com.java.test.junior.model.User;
 import com.java.test.junior.model.UserDTO;
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
 import org.springframework.http.HttpStatus;

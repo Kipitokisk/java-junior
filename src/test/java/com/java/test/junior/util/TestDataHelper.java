@@ -7,6 +7,7 @@ import com.java.test.junior.model.User;
 import com.java.test.junior.model.UserDTO;
 import com.java.test.junior.service.ProductService;
 import com.java.test.junior.service.UserService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.core.Authentication;
@@ -20,19 +21,12 @@ import org.springframework.stereotype.Component;
 import java.util.Objects;
 
 @Component
+@RequiredArgsConstructor
 public class TestDataHelper {
-
-    @Autowired
-    private UserService userService;
-
-    @Autowired
-    private ProductService productService;
-    @Autowired
-    private UserDetailsService userDetailsService;
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
-    @Autowired
-    private PasswordEncoder passwordEncoder;
+    private final ProductService productService;
+    private final UserDetailsService userDetailsService;
+    private final JdbcTemplate jdbcTemplate;
+    private final PasswordEncoder passwordEncoder;
 
     public Product createTestProduct(String name, Double price, String description, String username) {
         UserDetails userDetails = userDetailsService.loadUserByUsername(username);

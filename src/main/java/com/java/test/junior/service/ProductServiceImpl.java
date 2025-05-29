@@ -8,7 +8,6 @@ import com.java.test.junior.exception.ResourceNotFoundException;
 import com.java.test.junior.mapper.ProductMapper;
 import com.java.test.junior.mapper.UserProductMapper;
 import com.java.test.junior.model.*;
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
 import org.postgresql.copy.CopyManager;
@@ -43,7 +42,6 @@ public class ProductServiceImpl implements ProductService {
     private final UserService userService;
     private final UserProductMapper userProductMapper;
     private final DataSource dataSource;
-
 
 
     @Override
@@ -162,7 +160,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public ResponseEntity<Response> loadProductsFromCsv(String fileLocation) throws SQLException{
+    public ResponseEntity<Response> loadProductsFromCsv(String fileLocation) throws SQLException {
         log.info("Loading products from CSV with path: " + fileLocation);
         try {
             long adminUserId = userService.findByRole("ADMIN").getId();
@@ -219,8 +217,8 @@ public class ProductServiceImpl implements ProductService {
         LocalDateTime now = LocalDateTime.now();
         String nowStr = now.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
 
-        try(BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-            BufferedWriter writer = new BufferedWriter(new FileWriter(tempFile))) {
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+             BufferedWriter writer = new BufferedWriter(new FileWriter(tempFile))) {
 
             reader.readLine();
             writer.write("name,price,description,user_id,created_at,updated_at\n");
