@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.io.IOException;
 import java.sql.SQLException;
 
 @RestController
@@ -18,7 +19,7 @@ public class AdminController {
     private final ProductService productService;
 
     @PostMapping("/loading/products")
-    public ResponseEntity<Response> loadProducts(@RequestParam String path) throws SQLException {
+    public ResponseEntity<Response> loadProducts(@RequestParam String path) throws SQLException, IOException {
         return productService.loadProductsFromCsv(path);
     }
 }

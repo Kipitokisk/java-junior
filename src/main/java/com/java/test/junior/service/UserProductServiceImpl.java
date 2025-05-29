@@ -25,16 +25,17 @@ public class UserProductServiceImpl implements UserProductService{
     private final UserProductMapper userProductMapper;
 
     @Override
-    public ResponseEntity<Response> save(Long productId) {
+    public ResponseEntity<Response> like(Long productId) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = authentication.getName();
-        log.info("User " + username + " liking product: " + productId);
         User user = userService.findByUsername(username);
         productService.findProduct(productId);
         UserProduct userProduct = userProductMapper.findById(user.getId(), productId);
         if (userProduct != null) {
-            log.warning("User already liked product with ID " + productId);
-            throw new ResourceAlreadyExistsException("User already liked product with ID " + productId);
+            userProductMapper.delete(userProduct);
+            log.info("User " + username + " successfully disliked product: " + productId);
+            return ResponseEntity.status(HttpStatus.OK)
+                    .body(buildSuccessResponse("Product disliked successfully", null));
         }
         UserProduct userProductFinal = new UserProduct(user.getId(), productId);
         userProductMapper.save(userProductFinal);
@@ -42,24 +43,5 @@ public class UserProductServiceImpl implements UserProductService{
 
         return ResponseEntity.status(HttpStatus.OK)
                 .body(buildSuccessResponse("Product liked successfully", null));
-    }
-
-    @Override
-    public ResponseEntity<Response> delete(Long productId) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String username = authentication.getName();
-        log.info("User " + username + " disliking product: " + productId);
-        User user = userService.findByUsername(username);
-        productService.findProduct(productId);
-        UserProduct userProduct = userProductMapper.findById(user.getId(), productId);
-        if (userProduct == null) {
-            log.warning("User doesn't have product with ID  liked" + productId);
-            throw new ResourceNotFoundException("User doesn't have product with ID " + productId + " liked");
-        }
-        userProductMapper.delete(userProduct);
-        log.info("User " + username + " successfully disliked product: " + productId);
-
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(buildSuccessResponse("Product disliked successfully", null));
     }
 }

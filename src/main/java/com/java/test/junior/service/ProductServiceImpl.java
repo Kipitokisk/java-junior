@@ -14,7 +14,6 @@ import org.postgresql.copy.CopyManager;
 import org.postgresql.core.BaseConnection;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.jdbc.CannotGetJdbcConnectionException;
 import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -32,7 +31,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 import static com.java.test.junior.util.ResponseUtil.buildSuccessResponse;
-import static com.java.test.junior.util.ResponseUtil.getErrorResponse;
 
 @Service
 @RequiredArgsConstructor
@@ -151,8 +149,7 @@ public class ProductServiceImpl implements ProductService {
         Product product = productMapper.findByName(name);
         if (product == null) {
             log.warning("Product not found with name: " + name);
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(getErrorResponse("Product not found with name: " + name));
+            throw new ResourceNotFoundException("Product not found with name: " + name);
         }
 
         return ResponseEntity.status(HttpStatus.OK)
@@ -160,28 +157,20 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public ResponseEntity<Response> loadProductsFromCsv(String fileLocation) throws SQLException {
+    public ResponseEntity<Response> loadProductsFromCsv(String fileLocation) throws SQLException, IOException {
         log.info("Loading products from CSV with path: " + fileLocation);
-        try {
-            long adminUserId = userService.findByRole("ADMIN").getId();
+        long adminUserId = userService.findByRole("ADMIN").getId();
 
-            InputStream inputStream = getInputStream(fileLocation);
+        InputStream inputStream = getInputStream(fileLocation);
 
-            File tempFile = getTempFile(inputStream, adminUserId);
+        File tempFile = getTempFile(inputStream, adminUserId);
 
-            copy(tempFile);
+        copy(tempFile);
 
-            deleteTempFile(tempFile);
+        deleteTempFile(tempFile);
 
-            return ResponseEntity.status(HttpStatus.OK)
-                    .body(buildSuccessResponse("CSV file copied successfully", null));
-        } catch (IOException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(getErrorResponse("Failed to read the CSV file"));
-        } catch (CannotGetJdbcConnectionException e) {
-            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
-                    .body(getErrorResponse("Database connection failed"));
-        }
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(buildSuccessResponse("CSV file copied successfully", null));
     }
 
     @Override
@@ -189,13 +178,9 @@ public class ProductServiceImpl implements ProductService {
         productMapper.deleteAllByUserId(id);
     }
 
-    private void deleteTempFile(File tempFile) {
-        try {
-            Files.delete(tempFile.toPath());
-            log.info("Temporary file deleted.");
-        } catch (IOException e) {
-            log.warning("Failed to delete temporary file: " + e.getMessage());
-        }
+    private void deleteTempFile(File tempFile) throws IOException{
+        Files.delete(tempFile.toPath());
+        log.info("Temporary file deleted.");
     }
 
     private void copy(File tempFile) throws SQLException, IOException {
@@ -231,7 +216,7 @@ public class ProductServiceImpl implements ProductService {
         return tempFile;
     }
 
-    private InputStream getInputStream(String fileLocation) throws IOException {
+    private InputStream getInputStream(String fileLocation) throws IOException, FileNotFoundException {
         InputStream inputStream;
         if (fileLocation.startsWith("http://") || fileLocation.startsWith("https://")) {
             inputStream = new URL(fileLocation).openStream();

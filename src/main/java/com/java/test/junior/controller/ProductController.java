@@ -60,11 +60,6 @@ public class ProductController {
 
     @PostMapping("/like/{id}")
     public ResponseEntity<Response> likeProductById(@PathVariable("id") Long productId) {
-        return userProductService.save(productId);
-    }
-
-    @DeleteMapping("/dislike/{id}")
-    public ResponseEntity<Response> dislikeProductById(@PathVariable("id") Long productId) {
-        return userProductService.delete(productId);
+        return userProductService.like(productId);
     }
 }

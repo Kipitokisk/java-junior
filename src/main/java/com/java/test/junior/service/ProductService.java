@@ -8,6 +8,7 @@ import com.java.test.junior.model.ProductDTO;
 import com.java.test.junior.model.Response;
 import org.springframework.http.ResponseEntity;
 
+import java.io.IOException;
 import java.sql.SQLException;
 
 
@@ -24,7 +25,7 @@ public interface ProductService {
 
     ResponseEntity<Response> findByName(String name);
 
-    ResponseEntity<Response> loadProductsFromCsv(String fileLocation) throws SQLException;
+    ResponseEntity<Response> loadProductsFromCsv(String fileLocation) throws SQLException, IOException;
 
     void deleteAllByUserId(Long id);
 }

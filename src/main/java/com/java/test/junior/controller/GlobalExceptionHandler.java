@@ -10,6 +10,7 @@ import org.postgresql.util.PSQLException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.jdbc.CannotGetJdbcConnectionException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -17,6 +18,8 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
@@ -101,6 +104,26 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(getErrorResponse(ex.getMessage()));
     }
 
+    @ExceptionHandler(IOException.class)
+    public ResponseEntity<Response> handleIOException(IOException ex) {
+        log.warning("IO error occurred: " + ex.getMessage());
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(getErrorResponse("Failed to read the CSV file"));
+    }
+
+    @ExceptionHandler(CannotGetJdbcConnectionException.class)
+    public ResponseEntity<Response> handleJdbcConnectionException(CannotGetJdbcConnectionException ex) {
+        log.warning("Database connection failed: " + ex.getMessage());
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+                .body(getErrorResponse("Database connection failed"));
+    }
+
+    @ExceptionHandler(FileNotFoundException.class)
+    public ResponseEntity<Response> handleFileNotFoundException(FileNotFoundException ex) {
+        log.warning("File not found: " + ex.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(getErrorResponse("CSV file not found at the specified location"));
+    }
 
     private String extractPostgresMessage(String message) {
         return message.split("\n")[1];
