@@ -47,7 +47,7 @@ class AuthControllerIntegrationTest extends BaseIntegrationTest {
 
     @Test
     void testRegister_DuplicateUsername() {
-        testDataHelper.createTestUser("testuser", "testpass123");
+        testDataHelper.createTestUser(2, "testuser");
 
         UserDTO userDTO = new UserDTO();
         userDTO.setUsername("testuser");

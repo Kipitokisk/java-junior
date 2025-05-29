@@ -34,12 +34,6 @@ public class TestDataHelper {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    public void createTestUser(String username, String password) {
-        UserDTO user = new UserDTO(username, password);
-        userService.save(user);
-        userService.findByUsername(username);
-    }
-
     public Product createTestProduct(String name, Double price, String description, String username) {
         UserDetails userDetails = userDetailsService.loadUserByUsername(username);
         Authentication auth = new UsernamePasswordAuthenticationToken(userDetails, "testpass", userDetails.getAuthorities());
@@ -67,8 +61,14 @@ public class TestDataHelper {
     public void createAdminUser() {
         String password = passwordEncoder.encode("123456");
         jdbcTemplate.update(
-                "INSERT INTO \"user\" (id, username, password, created_at, updated_at, role) VALUES (?, ?, ?, current_timestamp, current_timestamp, ?)",
-                1, "admin", password, "ADMIN"
+                "INSERT INTO \"user\" (id, username, password, created_at, updated_at, role) " +
+                        "VALUES (?, ?, ?, current_timestamp, current_timestamp, ?)", 1, "admin", password, "ADMIN"
         );
+    }
+
+    public void createTestUser(int id, String username) {
+        String password = passwordEncoder.encode("123456");
+        jdbcTemplate.update("INSERT INTO \"user\" (id, username, password, created_at, updated_at, role) " +
+                "VALUES (?, ?, ?, current_timestamp, current_timestamp, ?)", id, username, password, "USER");
     }
 }

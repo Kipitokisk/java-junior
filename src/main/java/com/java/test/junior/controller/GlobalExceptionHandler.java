@@ -3,10 +3,10 @@ package com.java.test.junior.controller;
 import com.java.test.junior.exception.ForbiddenException;
 import com.java.test.junior.exception.ResourceAlreadyExistsException;
 import com.java.test.junior.exception.ResourceNotFoundException;
+import com.java.test.junior.exception.UnauthorizedException;
 import com.java.test.junior.model.Response;
+import lombok.extern.java.Log;
 import org.postgresql.util.PSQLException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,12 +25,12 @@ import java.util.stream.Collectors;
 import static com.java.test.junior.util.ResponseUtil.getErrorResponse;
 
 @RestControllerAdvice
+@Log
 public class GlobalExceptionHandler {
-    private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Response> handleValidationExceptions(MethodArgumentNotValidException ex) {
-        logger.warn("Validation error: {}", ex.getMessage());
+        log.warning("Validation error: " + ex.getMessage());
         Map<String, String> errors = new HashMap<>();
         for (FieldError error : ex.getBindingResult().getFieldErrors()) {
             errors.put(error.getField(), error.getDefaultMessage());
@@ -40,7 +40,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<Response> handleDataIntegrityViolation(DataIntegrityViolationException ex) {
-        logger.warn("Data integrity violation: {}", ex.getMessage());
+        log.warning("Data integrity violation: " + ex.getMessage());
 
         String userMessage = "Data conflict";
 
@@ -56,7 +56,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(SQLException.class)
     public ResponseEntity<Response> handleSQLException(SQLException ex) {
-        logger.warn("Database error occurred: {}", ex.getMessage());
+        log.warning("Database error occurred: " + ex.getMessage());
 
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(getErrorResponse("Database error: " + extractPostgresMessage(ex.getMessage())));
@@ -64,7 +64,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(ConstraintViolationException.class)
     public ResponseEntity<Response> handleConstraintViolationException(ConstraintViolationException ex) {
-        logger.warn("Constraint violation: {}", ex.getMessage());
+        log.warning("Constraint violation: " + ex.getMessage());
 
         String violations = ex.getConstraintViolations().stream()
                 .map(ConstraintViolation::getMessage)
@@ -76,24 +76,31 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<Response> handleResourceNotFoundException(ResourceNotFoundException ex) {
-        logger.warn("Resource not found: {}", ex.getMessage());
+        log.warning("Resource not found: " + ex.getMessage());
 
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(getErrorResponse(ex.getMessage()));
     }
 
     @ExceptionHandler(ForbiddenException.class)
     public ResponseEntity<Response> handleForbiddenException(ForbiddenException ex) {
-        logger.warn("Forbidden access: {}", ex.getMessage());
+        log.warning("Forbidden access: " + ex.getMessage());
 
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(getErrorResponse(ex.getMessage()));
     }
 
     @ExceptionHandler(ResourceAlreadyExistsException.class)
     public ResponseEntity<Response> handleResourceAlreadyExistsException(ResourceAlreadyExistsException ex) {
-        logger.warn("Resource already exists: {}", ex.getMessage());
+        log.warning("Resource already exists: " + ex.getMessage());
 
         return ResponseEntity.status(HttpStatus.CONFLICT).body(getErrorResponse(ex.getMessage()));
     }
+
+    @ExceptionHandler(UnauthorizedException.class)
+    public ResponseEntity<Response> handleUnauthorizedException(UnauthorizedException ex) {
+        log.warning("Unauthorized access: " + ex.getMessage());
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(getErrorResponse(ex.getMessage()));
+    }
+
 
     private String extractPostgresMessage(String message) {
         return message.split("\n")[1];

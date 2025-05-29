@@ -28,7 +28,6 @@ class AdminControllerIntegrationTest extends BaseIntegrationTest {
         RestAssured.port = port;
         testDataHelper.cleanupAllTables();
         testDataHelper.createAdminUser();
-        testDataHelper.createTestUser("testuser", "testpass");
         adminAuth = createBasicAuthHeader("admin", "123456");
 
         Path resourcePath = Paths.get("C:\\GlobalDatabaseInternship\\java-junior\\src\\test\\java\\resources\\products.csv");
@@ -89,7 +88,8 @@ class AdminControllerIntegrationTest extends BaseIntegrationTest {
 
     @Test
     void testLoadProducts_Forbidden() {
-        String userAuth = createBasicAuthHeader("testuser", "testpass");
+        testDataHelper.createTestUser(2, "testuser");
+        String userAuth = createBasicAuthHeader("testuser", "123456");
 
         given()
                 .header("Authorization", userAuth)

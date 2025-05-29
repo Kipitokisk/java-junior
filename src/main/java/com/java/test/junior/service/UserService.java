@@ -7,7 +7,10 @@ import org.springframework.http.ResponseEntity;
 
 public interface UserService {
     User findByUsername(String username);
+
     ResponseEntity<Response> save(UserDTO userDTO);
+
     void delete(Long id);
+
     User findByRole(String role);
 }

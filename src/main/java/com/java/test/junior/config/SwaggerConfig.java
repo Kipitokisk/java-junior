@@ -35,6 +35,7 @@ public class SwaggerConfig {
                                 new SecurityScheme()
                                         .name(SECURITY_SCHEME_NAME)
                                         .type(SecurityScheme.Type.HTTP)
-                                        .scheme("basic")));
+                                        .scheme("basic")
+                                        .in(SecurityScheme.In.HEADER)));
     }
 }

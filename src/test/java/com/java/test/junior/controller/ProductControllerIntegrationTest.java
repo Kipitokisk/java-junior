@@ -27,8 +27,8 @@ class ProductControllerIntegrationTest extends BaseIntegrationTest {
 
         testDataHelper.cleanupAllTables();
 
-        testDataHelper.createTestUser("testuser", "testpass");
-        userAuth = createBasicAuthHeader("testuser", "testpass");
+        testDataHelper.createTestUser(2, "testuser");
+        userAuth = createBasicAuthHeader("testuser", "123456");
     }
 
     @Test
@@ -133,8 +133,8 @@ class ProductControllerIntegrationTest extends BaseIntegrationTest {
         Product originalProduct = testDataHelper.createTestProduct("Test", 20.0, "Test", "testuser");
         Long productId = originalProduct.getId();
 
-        testDataHelper.createTestUser("testuser2", "testpass");
-        String anotherUserAuth = createBasicAuthHeader("testuser2", "testpass");
+        testDataHelper.createTestUser(3, "testuser2");
+        String anotherUserAuth = createBasicAuthHeader("testuser2", "123456");
 
         ProductDTO updatedProduct = new ProductDTO("HackedTest", 30.0, "HackedTest");
 
@@ -175,8 +175,8 @@ class ProductControllerIntegrationTest extends BaseIntegrationTest {
         Product originalProduct = testDataHelper.createTestProduct("Test", 20.0, "Test", "testuser");
         Long productId = originalProduct.getId();
 
-        testDataHelper.createTestUser("testuser2", "testpass");
-        String anotherUserAuth = createBasicAuthHeader("testuser2", "testpass");
+        testDataHelper.createTestUser(3, "testuser2");
+        String anotherUserAuth = createBasicAuthHeader("testuser2", "123456");
 
         given()
                 .header("Authorization", anotherUserAuth)

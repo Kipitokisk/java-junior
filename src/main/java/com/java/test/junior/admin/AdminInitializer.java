@@ -2,28 +2,23 @@ package com.java.test.junior.admin;
 
 import com.java.test.junior.mapper.UserMapper;
 import com.java.test.junior.model.User;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Value;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
-@Component
-public class AdminInitializer implements ApplicationRunner {
 
+@Log
+@Component
+@RequiredArgsConstructor
+public class AdminInitializer implements ApplicationRunner {
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
-    private static final Logger logger = LoggerFactory.getLogger(AdminInitializer.class);
     @Value("${admin.default.password}")
     private String adminPassword;
-
-
-    public AdminInitializer(UserMapper userMapper, PasswordEncoder passwordEncoder) {
-        this.userMapper = userMapper;
-        this.passwordEncoder = passwordEncoder;
-    }
 
     @Override
     public void run(ApplicationArguments args) {
@@ -36,9 +31,9 @@ public class AdminInitializer implements ApplicationRunner {
             admin.setRole("ADMIN");
 
             userMapper.save(admin);
-            logger.info("Default admin created.");
+            log.info("Default admin created.");
         } else {
-            logger.warn("Admin already exists.");
+            log.warning("Admin already exists.");
         }
     }
 }

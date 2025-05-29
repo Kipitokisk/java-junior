@@ -1,5 +1,7 @@
 package com.java.test.junior.config;
 
+import com.java.test.junior.util.CustomAccessDeniedHandler;
+import com.java.test.junior.util.CustomAuthEntryPoint;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -7,6 +9,8 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+
+import javax.servlet.http.HttpServletResponse;
 
 @Configuration
 @EnableWebSecurity
@@ -16,7 +20,8 @@ public class SecurityConfig {
             "/swagger-ui/**",
             "/v3/api-docs/**",
             "/swagger-resources/**",
-            "/swagger-resources"
+            "/swagger-resources",
+            "swagger-ui.html"
     };
 
     @Bean
@@ -28,6 +33,10 @@ public class SecurityConfig {
                 .antMatchers("/api/products/**").hasAuthority("USER")
                 .antMatchers("/api/admin/**").hasAuthority("ADMIN")
                 .anyRequest().authenticated()
+                .and()
+                .exceptionHandling()
+                .accessDeniedHandler(new CustomAccessDeniedHandler())
+                .authenticationEntryPoint(new CustomAuthEntryPoint())
                 .and()
                 .httpBasic()
                 .and()

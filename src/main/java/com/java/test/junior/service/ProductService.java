@@ -13,11 +13,18 @@ import java.sql.SQLException;
 
 public interface ProductService {
     ResponseEntity<Response> createProduct(ProductDTO productDTO);
+
     ResponseEntity<Response> findProduct(Long id);
-    ResponseEntity<Response> updateProduct(Long id, ProductDTO productDTO, String authentication);
-    ResponseEntity<Response> deleteProduct(Long id, String authentication);
+
+    ResponseEntity<Response> updateProduct(Long id, ProductDTO productDTO);
+
+    ResponseEntity<Response> deleteProduct(Long id);
+
     ResponseEntity<PaginatedResponse> findAll(int page, int pageSize);
+
     ResponseEntity<Response> findByName(String name);
+
     ResponseEntity<Response> loadProductsFromCsv(String fileLocation) throws SQLException;
+
     void deleteAllByUserId(Long id);
 }

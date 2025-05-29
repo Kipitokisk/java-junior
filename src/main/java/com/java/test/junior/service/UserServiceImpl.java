@@ -7,8 +7,8 @@ import com.java.test.junior.model.Response;
 import com.java.test.junior.model.User;
 import com.java.test.junior.model.UserDTO;
 import lombok.AllArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.java.Log;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -18,34 +18,34 @@ import java.util.Collections;
 import static com.java.test.junior.util.ResponseUtil.buildSuccessResponse;
 
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
+@Log
 public class UserServiceImpl implements UserService{
-    private static final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
     private final UserMapper userMapper;
-    private PasswordEncoder passwordEncoder;
+    private final PasswordEncoder passwordEncoder;
 
     public User findByUsername(String username) {
-        logger.info("Finding user with username: {}", username);
+        log.info("Finding user with username: " + username);
         User user = userMapper.findByUsername(username);
         if (user == null) {
-            logger.warn("User not found with username: {}", username);
+            log.warning("User not found with username: " + username);
             throw new ResourceNotFoundException("User not found with username: " + username);
         }
         return user;
     }
 
     public User findByRole(String role) {
-        logger.info("Finding users with role: {}", role);
+        log.info("Finding users with role: " + role);
         User user = userMapper.findByRole(role);
         if (user == null) {
-            logger.warn("User not found with role: {}", role);
+            log.warning("User not found with role: " + role);
             throw new ResourceNotFoundException("User not found with role: " + role);
         }
         return user;
     }
 
     public ResponseEntity<Response> save(UserDTO userDTO) {
-        logger.info("Registration called with: {}", userDTO);
+        log.info("Registration called with: " + userDTO);
 
         User user = new User();
         user.setUsername(userDTO.getUsername());
@@ -57,7 +57,9 @@ public class UserServiceImpl implements UserService{
             throw new ResourceAlreadyExistsException("Username '" + user.getUsername() + "' is already taken");
         }
         userMapper.save(user);
-        return ResponseEntity.status(HttpStatus.OK).body(buildSuccessResponse("User registered successfully", Collections.singletonMap("username", user.getUsername())));
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(buildSuccessResponse("User registered successfully",
+                        Collections.singletonMap("username", user.getUsername())));
     }
 
     public void delete(Long id) {
