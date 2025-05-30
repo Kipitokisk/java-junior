@@ -5,20 +5,20 @@ import com.java.test.junior.model.UserDTO;
 import com.java.test.junior.util.TestDataHelper;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
-import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.MethodOrderer;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.containsString;
 
-@RequiredArgsConstructor
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class AuthControllerIntegrationTest extends BaseIntegrationTest {
-    private final TestDataHelper testDataHelper;
+    @Autowired
+    private TestDataHelper testDataHelper;
 
     @BeforeEach
     void setUpTest() {
@@ -31,6 +31,7 @@ class AuthControllerIntegrationTest extends BaseIntegrationTest {
         UserDTO userDTO = new UserDTO();
         userDTO.setUsername("testuser");
         userDTO.setPassword("testpass123");
+        userDTO.setEmail("testuser1@gmail.com");
 
         given()
                 .contentType(ContentType.JSON)
@@ -51,6 +52,7 @@ class AuthControllerIntegrationTest extends BaseIntegrationTest {
         UserDTO userDTO = new UserDTO();
         userDTO.setUsername("testuser");
         userDTO.setPassword("differentpass123");
+        userDTO.setEmail("testuser2@gmail.com");
 
         given()
                 .contentType(ContentType.JSON)

@@ -28,6 +28,7 @@ public class SecurityConfig {
                 .authorizeRequests()
                 .antMatchers("/api/auth/**").permitAll()
                 .antMatchers(SWAGGER_WHITELIST).permitAll()
+                .antMatchers("/api/forgot-password", "/api/reset-password").permitAll()
                 .antMatchers("/api/products/**").hasAuthority("USER")
                 .antMatchers("/api/admin/**").hasAuthority("ADMIN")
                 .anyRequest().authenticated()

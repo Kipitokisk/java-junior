@@ -1,7 +1,9 @@
 package com.java.test.junior.mapper;
 
 import com.java.test.junior.model.UserProduct;
+import org.apache.ibatis.annotations.Mapper;
 
+@Mapper
 public interface UserProductMapper {
     void save(UserProduct userProduct);
 

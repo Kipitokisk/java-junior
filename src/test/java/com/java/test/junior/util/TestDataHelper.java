@@ -18,7 +18,9 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDateTime;
 import java.util.Objects;
+import java.util.UUID;
 
 @Component
 @RequiredArgsConstructor
@@ -55,14 +57,35 @@ public class TestDataHelper {
     public void createAdminUser() {
         String password = passwordEncoder.encode("123456");
         jdbcTemplate.update(
-                "INSERT INTO \"user\" (id, username, password, created_at, updated_at, role) " +
-                        "VALUES (?, ?, ?, current_timestamp, current_timestamp, ?)", 1, "admin", password, "ADMIN"
-        );
+                "INSERT INTO \"user\" (id, username, password, created_at, updated_at, role, email) " +
+                        "VALUES (?, ?, ?, current_timestamp, current_timestamp, ?, ?)", 1, "admin", password,
+                "ADMIN", "testadmin@gmail.com");
     }
 
     public void createTestUser(int id, String username) {
         String password = passwordEncoder.encode("123456");
-        jdbcTemplate.update("INSERT INTO \"user\" (id, username, password, created_at, updated_at, role) " +
-                "VALUES (?, ?, ?, current_timestamp, current_timestamp, ?)", id, username, password, "USER");
+        jdbcTemplate.update("INSERT INTO \"user\" (id, username, password, created_at, updated_at, role, email) " +
+                "VALUES (?, ?, ?, current_timestamp, current_timestamp, ?, ?)", id, username, password, "USER",
+                username + "@gmail.com");
+    }
+
+    public String createPasswordResetToken(String email) {
+        String token = UUID.randomUUID().toString();
+        LocalDateTime expiry = LocalDateTime.now().plusHours(3).plusMinutes(30);
+
+        jdbcTemplate.update("INSERT INTO password_reset_token (token, email, expiry) VALUES (?, ?, ?)",
+                token, email, expiry);
+
+        return token;
+    }
+
+    public String createExpiredPasswordResetToken(String email) {
+        String token = UUID.randomUUID().toString();
+        LocalDateTime expiry = LocalDateTime.now().minusHours(1);
+
+        jdbcTemplate.update("INSERT INTO password_reset_token (token, email, expiry) VALUES (?, ?, ?)",
+                token, email, expiry);
+
+        return token;
     }
 }
