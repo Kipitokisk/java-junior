@@ -216,7 +216,7 @@ public class ProductServiceImpl implements ProductService {
         return tempFile;
     }
 
-    private InputStream getInputStream(String fileLocation) throws IOException, FileNotFoundException {
+    private InputStream getInputStream(String fileLocation) throws IOException {
         InputStream inputStream;
         if (fileLocation.startsWith("http://") || fileLocation.startsWith("https://")) {
             inputStream = new URL(fileLocation).openStream();
