@@ -9,18 +9,19 @@
         <id property="id" column="id"/>
         <result property="username" column="username"/>
         <result property="password" column="password"/>
+        <result property="email" column="email"/>
         <result property="createdAt" column="created_at"/>
         <result property="updatedAt" column="updated_at"/>
         <result property="role" column="role"/>
     </resultMap>
 
     <insert id="save" parameterType="com.java.test.junior.model.User">
-        INSERT INTO "user" (username, password, created_at, updated_at, role)
-        VALUES (#{username}, #{password}, NOW(), NOW(), #{role})
+        INSERT INTO "user" (username, password, email, created_at, updated_at, role)
+        VALUES (#{username}, #{password}, #{email}, NOW(), NOW(), #{role})
     </insert>
 
     <update id="update" parameterType="com.java.test.junior.model.User">
-        UPDATE "user" SET username = #{username}, password = #{password}, updated_at = NOW()
+        UPDATE "user" SET username = #{username}, password = #{password}, email = #{email}, updated_at = NOW()
         WHERE id = #{id}
     </update>
 
@@ -37,6 +38,15 @@
     </select>
 
     <select id="findByRole" resultMap="userResultMapper">
-        SELECT * FROM "user" where role = #{role}
+        SELECT * FROM "user" WHERE role = #{role}
     </select>
+
+    <select id="findByEmail" resultMap="userResultMapper">
+        SELECT * FROM "user" WHERE email = #{email}
+    </select>
+    
+    <update id="updatePasswordByEmail">
+        UPDATE "user" SET password = #{encodedPassword}, updated_at = now()
+        WHERE email = #{email}
+    </update>
 </mapper>

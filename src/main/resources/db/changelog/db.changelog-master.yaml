@@ -38,3 +38,23 @@ databaseChangeLog:
               - column:
                   name: role
                   type: varchar(10)
+  - changeSet:
+      id: 6
+      author: java-test-junior
+      changes:
+        - addColumn:
+            tableName: user
+            columns:
+              - column:
+                  name: email
+                  type: varchar(255)
+                  constraints:
+                    unique: true
+                    uniqueConstraintName: uq_user_email
+  - changeSet:
+      id: 7
+      author: java-test-junior
+      changes:
+        - sqlFile:
+            path: migration/V4__create_table_password_reset_token.sql
+            relativeToChangelogFile: true

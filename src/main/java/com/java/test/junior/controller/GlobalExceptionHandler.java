@@ -1,9 +1,6 @@
 package com.java.test.junior.controller;
 
-import com.java.test.junior.exception.ForbiddenException;
-import com.java.test.junior.exception.ResourceAlreadyExistsException;
-import com.java.test.junior.exception.ResourceNotFoundException;
-import com.java.test.junior.exception.UnauthorizedException;
+import com.java.test.junior.exception.*;
 import com.java.test.junior.model.Response;
 import lombok.extern.java.Log;
 import org.postgresql.util.PSQLException;
@@ -123,6 +120,12 @@ public class GlobalExceptionHandler {
         log.warning("File not found: " + ex.getMessage());
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(getErrorResponse("CSV file not found at the specified location"));
+    }
+
+    @ExceptionHandler(TokenExpired.class)
+    public ResponseEntity<Response> handleTokenExpiredException(TokenExpired ex) {
+        log.warning("Token error: " + ex.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(getErrorResponse("Token has expired"));
     }
 
     private String extractPostgresMessage(String message) {

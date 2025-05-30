@@ -3,22 +3,21 @@ package com.java.test.junior.controller;
 import com.java.test.junior.BaseIntegrationTest;
 import com.java.test.junior.util.TestDataHelper;
 import io.restassured.RestAssured;
-import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.MethodOrderer;
-
+import org.springframework.beans.factory.annotation.Autowired;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.*;
 
-@RequiredArgsConstructor
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class AdminControllerIntegrationTest extends BaseIntegrationTest {
-    private final TestDataHelper testDataHelper;
+    @Autowired
+    private TestDataHelper testDataHelper;
 
     private String validCsvPath;
 
@@ -70,7 +69,7 @@ class AdminControllerIntegrationTest extends BaseIntegrationTest {
                 .when()
                 .post(getApiUrl("/admin/loading/products"))
                 .then()
-                .statusCode(500)
+                .statusCode(404)
                 .body("success", equalTo(false))
                 .body("message", equalTo("Failed to read the CSV file"));
     }

@@ -43,12 +43,28 @@ public class UserServiceImpl implements UserService{
         return user;
     }
 
+    public User findByEmail(String email) {
+        log.info("Finding users with email: " + email);
+        User user = userMapper.findByEmail(email);
+        if (user == null) {
+            log.warning("User not found with email: " + email);
+            throw new ResourceNotFoundException("User not found with email: " + email);
+        }
+        return user;
+    }
+
+    @Override
+    public void updatePasswordByEmail(String email, String newPassword) {
+        userMapper.updatePasswordByEmail(email, newPassword);
+    }
+
     public ResponseEntity<Response> save(UserDTO userDTO) {
         log.info("Registration called with: " + userDTO);
 
         User user = new User();
         user.setUsername(userDTO.getUsername());
         user.setPassword(passwordEncoder.encode(userDTO.getPassword()));
+        user.setEmail(userDTO.getEmail());
         user.setRole("USER");
 
         User existingUser = userMapper.findByUsername(user.getUsername());

@@ -2,6 +2,7 @@ package com.java.test.junior.model;
 
 import lombok.*;
 
+import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 import java.time.LocalDateTime;
@@ -18,6 +19,9 @@ public class User {
     @NotBlank(message = "Password is required")
     @Size(min = 6, message = "Password must be at least 6 characters")
     private String password;
+    @NotBlank(message = "Email is required")
+    @Email(message = "Invalid email format")
+    private String email;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private String role;

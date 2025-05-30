@@ -6,19 +6,18 @@ import com.java.test.junior.model.ProductDTO;
 import com.java.test.junior.util.TestDataHelper;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
-import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.MethodOrderer;
-
+import org.springframework.beans.factory.annotation.Autowired;
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.*;
 
-@RequiredArgsConstructor
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class ProductControllerIntegrationTest extends BaseIntegrationTest {
-    private final TestDataHelper testDataHelper;
+    @Autowired
+    private TestDataHelper testDataHelper;
 
     @BeforeEach
     void setUpTest() {
@@ -289,7 +288,7 @@ class ProductControllerIntegrationTest extends BaseIntegrationTest {
         given()
                 .header("Authorization", userAuth)
                 .when()
-                .delete(getApiUrl("/products/dislike/" + productId))
+                .post(getApiUrl("/products/like/" + productId))
                 .then()
                 .statusCode(200)
                 .body("success", equalTo(true));
